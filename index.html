@@ -404,7 +404,11 @@ Reveal.addEventListener( 'customevent', function() {
 					{ src: 'vendor/reveal.js/plugin/highlight/highlight.js', async: true, condition: function() { return !!document.querySelector( 'pre code' ); }, callback: function() { hljs.initHighlightingOnLoad(); } },
 					{ src: 'vendor/reveal.js/plugin/zoom-js/zoom.js', async: true },
 					{ src: 'vendor/reveal.js/plugin/notes/notes.js', async: true },
-					{ src: 'video-sync.js', async: true }
+					{ src: 'video-sync.js', async: true,
+						callback: function() {
+							RevealVideoSync.load('http://www.webestools.com/page/media/videoTag/BigBuckBunny.webm', './slides.vtt');
+						}
+					}
 				]
 			});
 
