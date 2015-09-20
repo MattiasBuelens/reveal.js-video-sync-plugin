@@ -7,7 +7,7 @@
  * By Mattias Buelens (http://github.com/MattiasBuelens)
  */
 
-var RevealVideoSync = (function () {
+var RevealVideoSync = (function (Reveal) {
     'use strict';
 
     var containerClass = 'reveal-video-sync',
@@ -90,9 +90,7 @@ var RevealVideoSync = (function () {
         if (!left || !right) {
             return !left && !right;
         }
-        return left.h === right.h
-            && left.v === right.v
-            && left.f === right.f;
+        return left.h === right.h && left.v === right.v && left.f === right.f;
     }
 
     function parseSlide(hash) {
@@ -247,4 +245,4 @@ var RevealVideoSync = (function () {
     return {
         load: loadVideo
     };
-})();
+})(window.Reveal);
