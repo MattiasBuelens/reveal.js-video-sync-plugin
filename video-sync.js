@@ -141,6 +141,50 @@ var RevealVideoSync = (function () {
         Reveal.slide(slide.h || 0, slide.v || 0, slide.f || 0);
     }
 
+    var slideMap;
+
+    function loadSlideMap(track) {
+        slideMap = {};
+        for (var i = 0; i < track.cues.length; i++) {
+            var cue = track.cues[i],
+                slide = getCueSlide(cue);
+            if (slide) {
+                var h = slideMap[slide.h] || (slideMap[slide.h] = {}),
+                    v = h[slide.v] || (h[slide.v] = {}),
+                    f = v[slide.f] || (v[slide.f] = []);
+                f.push(cue);
+            }
+        }
+    }
+
+    function findClosestSlideCue(slide, time) {
+        if (!slideMap) {
+            // Not loaded
+            return null;
+        }
+        var h = slideMap[slide.h],
+            v = h && h[slide.v],
+            f = v && v[slide.f];
+        if (!f) {
+            // Not found
+            return null;
+        }
+        var closestCue,
+            closestDistance = Infinity;
+        for (var i = 0; i < f.length; i++) {
+            var cue = f[i],
+                distance = Math.min(Math.abs(cue.startTime - time), Math.abs(cue.endTime - time));
+            if (cue.startTime <= time && time < cue.endTime) {
+                // Time inside cue interval
+                return cue;
+            } else if (distance < closestDistance) {
+                closestCue = cue;
+                closestDistance = distance;
+            }
+        }
+        return closestCue;
+    }
+
     var activeCueSlide;
 
     function cueChanged() {
@@ -153,12 +197,35 @@ var RevealVideoSync = (function () {
         jumpToSlide(activeCueSlide);
     }
 
+    function slideChanged() {
+        var slide = normalizeSlide(Reveal.getIndices());
+        if (slidesEqual(slide, activeCueSlide)) {
+            // Already active slide
+            return;
+        }
+        // Find cue closest in time with this slide
+        var cue = findClosestSlideCue(slide, video.currentTime);
+        if (!cue) {
+            return;
+        }
+        // Seek to start of closest cue
+        video.currentTime = cue.startTime + 0.001; // avoid overlap with previous
+    }
+
     function trackLoaded() {
+        loadSlideMap(track);
         track.addEventListener('cuechange', cueChanged);
+        Reveal.addEventListener('slidechanged', slideChanged);
+        Reveal.addEventListener('fragmentshown', slideChanged);
+        Reveal.addEventListener('fragmenthidden', slideChanged);
     }
 
     function trackUnloaded() {
+        slideMap = null;
         track.removeEventListener('cuechange', cueChanged);
+        Reveal.removeEventListener('slidechanged', slideChanged);
+        Reveal.removeEventListener('fragmentshown', slideChanged);
+        Reveal.removeEventListener('fragmenthidden', slideChanged);
     }
 
     function loadVideo(videoUrl, slidesUrl) {
