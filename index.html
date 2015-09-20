@@ -29,6 +29,8 @@
 			document.getElementsByTagName( 'head' )[0].appendChild( link );
 		</script>
 
+		<link rel="stylesheet" href="video-sync.css">
+
 		<!--[if lt IE 9]>
 		<script src="vendor/reveal.js/lib/js/html5shiv.js"></script>
 		<![endif]-->
@@ -36,7 +38,7 @@
 
 	<body>
 
-		<div class="reveal">
+		<div class="reveal reveal-video-sync-right">
 
 			<!-- Any section element inside of this container is displayed as a slide -->
 			<div class="slides">
@@ -401,7 +403,8 @@ Reveal.addEventListener( 'customevent', function() {
 					{ src: 'vendor/reveal.js/plugin/markdown/markdown.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
 					{ src: 'vendor/reveal.js/plugin/highlight/highlight.js', async: true, condition: function() { return !!document.querySelector( 'pre code' ); }, callback: function() { hljs.initHighlightingOnLoad(); } },
 					{ src: 'vendor/reveal.js/plugin/zoom-js/zoom.js', async: true },
-					{ src: 'vendor/reveal.js/plugin/notes/notes.js', async: true }
+					{ src: 'vendor/reveal.js/plugin/notes/notes.js', async: true },
+					{ src: 'video-sync.js', async: true }
 				]
 			});
 
