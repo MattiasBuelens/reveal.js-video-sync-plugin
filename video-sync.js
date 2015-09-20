@@ -213,7 +213,13 @@ var RevealVideoSync = (function () {
     }
 
     function trackLoaded() {
+        activeCueSlide = null;
         loadSlideMap(track);
+
+        // Seek to initial slide
+        slideChanged();
+
+        // Bind listeners
         track.addEventListener('cuechange', cueChanged);
         Reveal.addEventListener('slidechanged', slideChanged);
         Reveal.addEventListener('fragmentshown', slideChanged);
@@ -221,7 +227,10 @@ var RevealVideoSync = (function () {
     }
 
     function trackUnloaded() {
+        activeCueSlide = null;
         slideMap = null;
+
+        // Unbind listeners
         track.removeEventListener('cuechange', cueChanged);
         Reveal.removeEventListener('slidechanged', slideChanged);
         Reveal.removeEventListener('fragmentshown', slideChanged);
