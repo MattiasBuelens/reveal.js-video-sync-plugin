@@ -82,7 +82,7 @@ var RevealVideoSync = (function (Reveal) {
     function normalizeSlide(indices) {
         indices.h = indices.h || 0;
         indices.v = indices.v || 0;
-        indices.f = indices.f || 0;
+        indices.f = (indices.f === undefined || isNaN(indices.f)) ? -1 : indices.f;
         return indices;
     }
 
@@ -136,7 +136,7 @@ var RevealVideoSync = (function (Reveal) {
     }
 
     function jumpToSlide(slide) {
-        Reveal.slide(slide.h || 0, slide.v || 0, slide.f || 0);
+        Reveal.slide(slide.h, slide.v, slide.f);
     }
 
     var slideMap;
