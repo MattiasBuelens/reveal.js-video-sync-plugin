@@ -82,7 +82,7 @@ var RevealVideoSync = (function (Reveal) {
     function normalizeSlide(indices) {
         indices.h = indices.h || 0;
         indices.v = indices.v || 0;
-        indices.f = (indices.f === undefined || isNaN(indices.f)) ? -1 : indices.f;
+        indices.f = (typeof indices.f === 'number' && !isNaN(indices.f)) ? indices.f : -1;
         return indices;
     }
 
