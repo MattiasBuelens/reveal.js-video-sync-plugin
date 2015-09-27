@@ -210,15 +210,34 @@ var RevealVideoSync = (function (Reveal) {
         video.currentTime = cue.startTime + 0.001; // avoid overlap with previous
     }
 
+    var activeCue;
+
+    function timeUpdated() {
+        if (!track) {
+            return;
+        }
+        var newActiveCue = track.activeCues.length ? track.activeCues[0] : null;
+        if (newActiveCue !== activeCue) {
+            activeCue = newActiveCue;
+            cueChanged();
+        }
+    }
+
     function trackLoaded() {
         activeCueSlide = null;
+        activeCue = null;
         loadSlideMap(track);
 
         // Seek to initial slide
         slideChanged();
 
         // Bind listeners
-        track.addEventListener('cuechange', cueChanged);
+        if ('oncuechange' in track) {
+            track.addEventListener('cuechange', cueChanged);
+        } else {
+            // Polyfill missing support for cuechange event with timeupdate
+            video.addEventListener('timeupdate', timeUpdated);
+        }
         Reveal.addEventListener('slidechanged', slideChanged);
         Reveal.addEventListener('fragmentshown', slideChanged);
         Reveal.addEventListener('fragmenthidden', slideChanged);
@@ -226,10 +245,12 @@ var RevealVideoSync = (function (Reveal) {
 
     function trackUnloaded() {
         activeCueSlide = null;
+        activeCue = null;
         slideMap = null;
 
         // Unbind listeners
         track.removeEventListener('cuechange', cueChanged);
+        video.removeEventListener('timeupdate', timeUpdated);
         Reveal.removeEventListener('slidechanged', slideChanged);
         Reveal.removeEventListener('fragmentshown', slideChanged);
         Reveal.removeEventListener('fragmenthidden', slideChanged);
