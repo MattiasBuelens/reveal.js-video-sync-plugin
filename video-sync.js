@@ -2,9 +2,10 @@
  * reveal.js video sync
  *
  * Synchronize video playback with reveal.js slide changes.
- * Can be used for conference talk recordings or online classrooms.
+ * https://github.com/MattiasBuelens/reveal.js-video-sync-plugin
+ * MIT licensed
  *
- * By Mattias Buelens (http://github.com/MattiasBuelens)
+ * Copyright (C) Mattias Buelens (http://github.com/MattiasBuelens)
  */
 
 var RevealVideoSync = (function (Reveal) {
