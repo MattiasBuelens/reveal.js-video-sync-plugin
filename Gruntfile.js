@@ -32,7 +32,7 @@ module.exports = function(grunt) {
 		sass: {
 			dist: {
 				files: {
-					'dist/video-sync.css': 'video-sync.scss',
+					'dist/video-sync.css': 'video-sync.scss'
 				}
 			}
 		},
