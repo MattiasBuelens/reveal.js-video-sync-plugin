@@ -25,28 +25,28 @@ module.exports = function(grunt) {
 			},
 			build: {
 				src: 'video-sync.js',
-				dest: 'video-sync.min.js'
+				dest: 'dist/video-sync.min.js'
 			}
 		},
 
 		sass: {
 			dist: {
 				files: {
-					'video-sync.css': 'video-sync.scss',
+					'dist/video-sync.css': 'video-sync.scss',
 				}
 			}
 		},
 
 		autoprefixer: {
 			dist: {
-				src: 'video-sync.css'
+				src: 'dist/video-sync.css'
 			}
 		},
 
 		cssmin: {
 			compress: {
 				files: {
-					'video-sync.min.css': [ 'video-sync.css' ]
+					'dist/video-sync.min.css': [ 'dist/video-sync.css' ]
 				}
 			}
 		},
