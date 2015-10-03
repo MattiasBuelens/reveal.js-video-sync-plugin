@@ -76,6 +76,17 @@ module.exports = function(grunt) {
 			files: [ 'Gruntfile.js', 'video-sync.js' ]
 		},
 
+		connect: {
+			server: {
+				options: {
+					port: port,
+					base: base,
+					livereload: true,
+					open: true
+				}
+			}
+		},
+
 		watch: {
 			options: {
 				livereload: true
@@ -87,6 +98,9 @@ module.exports = function(grunt) {
 			css: {
 				files: [ 'video-sync.scss' ],
 				tasks: 'css'
+			},
+			html: {
+				files: [ 'index.html' ]
 			}
 		}
 
@@ -109,5 +123,8 @@ module.exports = function(grunt) {
 
 	// CSS
 	grunt.registerTask( 'css', [ 'sass', 'autoprefixer', 'cssmin' ] );
+
+	// Serve demo presentation locally
+	grunt.registerTask( 'serve', [ 'connect', 'watch' ] );
 
 };
