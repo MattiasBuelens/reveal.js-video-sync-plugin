@@ -1,0 +1,17 @@
+### grunt ###
+dist/
+.tmp/
+
+### Node ###
+logs
+*.log
+npm-debug.log*
+pids
+*.pid
+*.seed
+.grunt
+node_modules
+
+### Intellij ###
+*.iml
+.idea/
