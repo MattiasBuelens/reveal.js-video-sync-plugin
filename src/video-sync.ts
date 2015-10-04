@@ -4,17 +4,15 @@
 
 module RevealVideoSync {
 
-    var containerClass = 'reveal-video-sync',
-        container,
-        video;
+    var containerClass:string = 'reveal-video-sync',
+        container:HTMLElement,
+        video:HTMLVideoElement;
 
     function initialize() {
         // Video container
         if (!container) {
-            container = document.getElementsByClassName(containerClass);
-            if (container.length) {
-                container = container[0];
-            } else {
+            container = <HTMLElement> document.getElementsByClassName(containerClass)[0];
+            if (!container) {
                 container = document.createElement('aside');
                 container.className = containerClass;
                 document.querySelector('.reveal').appendChild(container);
@@ -22,7 +20,7 @@ module RevealVideoSync {
         }
         // Video element
         if (!video) {
-            video = container.querySelector('video');
+            video = <HTMLVideoElement> container.querySelector('video');
             if (!video) {
                 video = document.createElement('video');
                 video.controls = true;
@@ -31,11 +29,11 @@ module RevealVideoSync {
         }
     }
 
-    var trackElement,
-        track,
-        trackMetadataListener;
+    var trackElement:HTMLTrackElement,
+        track:TextTrack,
+        trackMetadataListener:() => void;
 
-    function setTrack(vttUrl) {
+    function setTrack(vttUrl:string) {
         if (video.readyState <= 0) {
             // Wait for metadata
             trackMetadataListener = function () {
@@ -73,21 +71,27 @@ module RevealVideoSync {
         }
     }
 
-    function normalizeSlide(indices) {
+    interface Indices {
+        h: number,
+        v: number,
+        f?: number
+    }
+
+    function normalizeSlide(indices:Indices):Indices {
         indices.h = indices.h || 0;
         indices.v = indices.v || 0;
         indices.f = (typeof indices.f === 'number' && !isNaN(indices.f)) ? indices.f : -1;
         return indices;
     }
 
-    function slidesEqual(left, right) {
+    function slidesEqual(left:Indices, right:Indices):boolean {
         if (!left || !right) {
             return !left && !right;
         }
         return left.h === right.h && left.v === right.v && left.f === right.f;
     }
 
-    function parseSlide(hash) {
+    function parseSlide(hash:string):Indices {
         // Attempt to parse the hash as either an index or name
         var bits = hash.split('/'),
             h, v, f;
@@ -120,22 +124,22 @@ module RevealVideoSync {
         return normalizeSlide({h: h, v: v, f: f});
     }
 
-    function getCueSlide(cue) {
+    function getCueSlide(cue:TextTrackCue) {
         return parseSlide(cue.text);
     }
 
-    function getActiveCueSlide() {
+    function getActiveCueSlide():Indices {
         var cues = trackElement.track.activeCues;
         return cues.length && getCueSlide(cues[0]);
     }
 
-    function jumpToSlide(slide) {
+    function jumpToSlide(slide:Indices) {
         Reveal.slide(slide.h, slide.v, slide.f);
     }
 
-    var slideMap;
+    var slideMap:{ [h: number] : { [v: number] : { [f: number] : TextTrackCue[] } } };
 
-    function loadSlideMap(track) {
+    function loadSlideMap(track:TextTrack) {
         slideMap = {};
         for (var i = 0; i < track.cues.length; i++) {
             var cue = track.cues[i],
@@ -149,7 +153,7 @@ module RevealVideoSync {
         }
     }
 
-    function findClosestSlideCue(slide, time) {
+    function findClosestSlideCue(slide:Indices, time:number):TextTrackCue {
         if (!slideMap) {
             // Not loaded
             return null;
@@ -177,7 +181,7 @@ module RevealVideoSync {
         return closestCue;
     }
 
-    var activeCueSlide;
+    var activeCueSlide:Indices;
 
     function cueChanged() {
         // Update slide of active cue
@@ -204,7 +208,7 @@ module RevealVideoSync {
         video.currentTime = cue.startTime + 0.001; // avoid overlap with previous
     }
 
-    var activeCue;
+    var activeCue:TextTrackCue;
 
     function timeUpdated() {
         if (!track) {
@@ -250,7 +254,7 @@ module RevealVideoSync {
         Reveal.removeEventListener('fragmenthidden', slideChanged);
     }
 
-    export function load(videoUrl, slidesUrl) {
+    export function load(videoUrl:string, slidesUrl:string) {
         initialize();
 
         video.src = videoUrl;
