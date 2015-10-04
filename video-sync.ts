@@ -1,13 +1,3 @@
-/*!
- * reveal.js video sync
- *
- * Synchronize video playback with reveal.js slide changes.
- * https://github.com/MattiasBuelens/reveal.js-video-sync-plugin
- * MIT licensed
- *
- * Copyright (C) Mattias Buelens (http://github.com/MattiasBuelens)
- */
-
 /// <reference path="typings/reveal/reveal.d.ts" />
 
 /* globals Reveal */
