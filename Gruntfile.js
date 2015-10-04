@@ -21,20 +21,19 @@ module.exports = function(grunt) {
 
 		clean: {
 			dist: [ 'dist/*.js', 'dist/*.css', 'dist/*.map' ],
-			js: [ 'video-sync.js', 'video-sync.js.map', 'video-sync.d.ts' ],
-			css: [ 'video-sync.css', 'video-sync.css.map' ]
+			js: [ 'src/*.js', 'src/*.js.map', 'src/*.d.ts' ],
+			css: [ 'src/*.css', 'src/*.css.map' ]
 		},
 
 		typescript: {
+			options: {
+				module: 'amd',
+				target: 'es5',
+				sourceMap: true,
+				declaration: true
+			},
 			build: {
-				src: 'video-sync.ts',
-				dest: 'video-sync.js',
-				options: {
-					module: 'amd',
-					target: 'es5',
-					sourceMap: true,
-					declaration: true
-				}
+				src: [ 'src/*.ts', '!src/*.d.ts' ]
 			}
 		},
 
@@ -46,8 +45,8 @@ module.exports = function(grunt) {
 			},
 			build: {
 				files: {
-					'dist/video-sync.js': 'video-sync.js',
-					'dist/video-sync.css': 'video-sync.css'
+					'dist/video-sync.js': 'src/*.js',
+					'dist/video-sync.css': 'src/video-sync.css'
 				}
 			}
 		},
@@ -57,8 +56,9 @@ module.exports = function(grunt) {
 				banner: '<%= meta.banner %>\n'
 			},
 			build: {
-				src: 'video-sync.js',
-				dest: 'dist/video-sync.min.js'
+				files: {
+					'dist/video-sync.min.js': 'src/*.js'
+				}
 			}
 		},
 
@@ -68,14 +68,14 @@ module.exports = function(grunt) {
 			},
 			build: {
 				files: {
-					'video-sync.css': 'video-sync.scss'
+					'src/video-sync.css': 'src/video-sync.scss'
 				}
 			}
 		},
 
 		autoprefixer: {
 			build: {
-				src: 'video-sync.css'
+				src: 'src/*.css'
 			}
 		},
 
@@ -110,7 +110,7 @@ module.exports = function(grunt) {
 				}
 			},
 			build: {
-				src: [ 'video-sync.js' ]
+				src: [ 'src/*.js' ]
 			},
 			grunt: {
 				src: [ 'Gruntfile.js' ]
@@ -133,7 +133,7 @@ module.exports = function(grunt) {
 				livereload: true
 			},
 			typescript: {
-				files: [ 'video-sync.ts' ],
+				files: [ 'src/*.ts' ],
 				tasks: 'js'
 			},
 			js: {
@@ -141,7 +141,7 @@ module.exports = function(grunt) {
 				tasks: 'default'
 			},
 			css: {
-				files: [ 'video-sync.scss' ],
+				files: [ 'src/*.scss' ],
 				tasks: 'css'
 			},
 			html: {

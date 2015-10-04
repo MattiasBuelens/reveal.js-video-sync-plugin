@@ -1,4 +1,4 @@
-/// <reference path="typings/reveal/reveal.d.ts" />
+/// <reference path="../typings/reveal/reveal.d.ts" />
 
 /* globals Reveal */
 
