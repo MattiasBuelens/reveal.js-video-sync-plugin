@@ -19,6 +19,25 @@ module.exports = function(grunt) {
 				' */'
 		},
 
+		clean: {
+			typescript: [ 'dist/*.ts' ],
+			js: [ 'dist/*.js', 'dist/*.js.map' ],
+			css: [ 'dist/*.css' ]
+		},
+
+		typescript: {
+			build: {
+				src: 'video-sync.ts',
+				dest: 'dist/video-sync.js',
+				options: {
+					module: 'amd',
+					target: 'es5',
+					sourceMap: true,
+					declaration: true
+				}
+			}
+		},
+
 		uglify: {
 			options: {
 				banner: '<%= meta.banner %>\n',
@@ -26,8 +45,11 @@ module.exports = function(grunt) {
 				sourceMapIncludeSources: true
 			},
 			build: {
-				src: 'video-sync.js',
-				dest: 'dist/video-sync.min.js'
+				src: 'dist/video-sync.js',
+				dest: 'dist/video-sync.min.js',
+				options: {
+					sourceMapIn: 'dist/video-sync.js.map'
+				}
 			}
 		},
 
@@ -75,7 +97,7 @@ module.exports = function(grunt) {
 					exports: false
 				}
 			},
-			files: [ 'Gruntfile.js', 'video-sync.js' ]
+			files: [ 'Gruntfile.js', 'dist/video-sync.js' ]
 		},
 
 		connect: {
@@ -93,8 +115,12 @@ module.exports = function(grunt) {
 			options: {
 				livereload: true
 			},
+			typescript: {
+				files: [ 'video-sync.ts' ],
+				tasks: 'typescript'
+			},
 			js: {
-				files: [ 'Gruntfile.js', 'video-sync.js' ],
+				files: [ 'Gruntfile.js' ],
 				tasks: 'js'
 			},
 			css: {
@@ -109,6 +135,7 @@ module.exports = function(grunt) {
 	});
 
 	// Dependencies
+	grunt.loadNpmTasks( 'grunt-typescript' );
 	grunt.loadNpmTasks( 'grunt-contrib-jshint' );
 	grunt.loadNpmTasks( 'grunt-contrib-cssmin' );
 	grunt.loadNpmTasks( 'grunt-contrib-uglify' );
@@ -116,9 +143,10 @@ module.exports = function(grunt) {
 	grunt.loadNpmTasks( 'grunt-sass' );
 	grunt.loadNpmTasks( 'grunt-contrib-connect' );
 	grunt.loadNpmTasks( 'grunt-autoprefixer' );
+	grunt.loadNpmTasks( 'grunt-contrib-clean' );
 
 	// Default task
-	grunt.registerTask( 'default', [ 'css', 'js' ] );
+	grunt.registerTask( 'default', [ 'css', 'typescript', 'js' ] );
 
 	// JS
 	grunt.registerTask( 'js', [ 'jshint', 'uglify' ] );

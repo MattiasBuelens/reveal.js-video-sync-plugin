@@ -8,8 +8,11 @@
  * Copyright (C) Mattias Buelens (http://github.com/MattiasBuelens)
  */
 
-var RevealVideoSync = (function (Reveal) {
-    'use strict';
+/// <reference path="typings/reveal/reveal.d.ts" />
+
+/* globals Reveal */
+
+module RevealVideoSync {
 
     var containerClass = 'reveal-video-sync',
         container,
@@ -257,14 +260,10 @@ var RevealVideoSync = (function (Reveal) {
         Reveal.removeEventListener('fragmenthidden', slideChanged);
     }
 
-    function loadVideo(videoUrl, slidesUrl) {
+    export function load(videoUrl, slidesUrl) {
         initialize();
 
         video.src = videoUrl;
         setTrack(slidesUrl);
     }
-
-    return {
-        load: loadVideo
-    };
-})(window.Reveal);
+}
