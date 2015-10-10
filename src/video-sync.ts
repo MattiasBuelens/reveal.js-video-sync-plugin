@@ -1,8 +1,9 @@
-/// <reference path="../typings/reveal/reveal.d.ts" />
-
 /* globals Reveal */
 
-module RevealVideoSync {
+/// <reference path="../typings/reveal/reveal.d.ts" />
+
+import EventEmitter from './event-emitter';
+
 
     var containerClass:string = 'reveal-video-sync',
         container:HTMLElement,
@@ -32,44 +33,6 @@ module RevealVideoSync {
     var trackElement:HTMLTrackElement,
         track:TextTrack,
         trackMetadataListener:() => void;
-
-    function setTrack(vttUrl:string) {
-        if (video.readyState <= 0) {
-            // Wait for metadata
-            trackMetadataListener = function () {
-                setTrack(vttUrl);
-            };
-            video.addEventListener('loadedmetadata', trackMetadataListener);
-            return;
-        }
-        // Clean up
-        removeTrack();
-        // Create new track
-        trackElement = document.createElement('track');
-        trackElement.kind = 'metadata';
-        trackElement.src = vttUrl;
-        trackElement.default = true;
-        trackElement.addEventListener('load', function () {
-            track = trackElement.track;
-            track.mode = 'hidden';
-            trackLoaded();
-        });
-        video.appendChild(trackElement);
-    }
-
-    function removeTrack() {
-        if (trackMetadataListener) {
-            video.removeEventListener('loadedmetadata', trackMetadataListener);
-        }
-        if (track) {
-            trackUnloaded();
-            track = null;
-        }
-        if (trackElement) {
-            video.removeChild(trackElement);
-            trackElement = null;
-        }
-    }
 
     interface Indices {
         h: number,
@@ -254,10 +217,47 @@ module RevealVideoSync {
         Reveal.removeEventListener('fragmenthidden', slideChanged);
     }
 
+    function removeTrack() {
+        if (trackMetadataListener) {
+            video.removeEventListener('loadedmetadata', trackMetadataListener);
+        }
+        if (track) {
+            trackUnloaded();
+            track = null;
+        }
+        if (trackElement) {
+            video.removeChild(trackElement);
+            trackElement = null;
+        }
+    }
+
+    function setTrack(vttUrl:string) {
+        if (video.readyState <= 0) {
+            // Wait for metadata
+            trackMetadataListener = function () {
+                setTrack(vttUrl);
+            };
+            video.addEventListener('loadedmetadata', trackMetadataListener);
+            return;
+        }
+        // Clean up
+        removeTrack();
+        // Create new track
+        trackElement = document.createElement('track');
+        trackElement.kind = 'metadata';
+        trackElement.src = vttUrl;
+        trackElement.default = true;
+        trackElement.addEventListener('load', function () {
+            track = trackElement.track;
+            track.mode = 'hidden';
+            trackLoaded();
+        });
+        video.appendChild(trackElement);
+    }
+
     export function load(videoUrl:string, slidesUrl:string) {
         initialize();
 
         video.src = videoUrl;
         setTrack(slidesUrl);
     }
-}
