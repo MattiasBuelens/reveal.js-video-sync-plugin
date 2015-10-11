@@ -23,6 +23,7 @@
   },
   "devDependencies": {
     "autoprefixer": "~6.0.3",
+    "browser-sync": "~2.9.11",
     "csswring": "~4.0.0",
     "del": "~2.0.2",
     "gulp": "~3.9.0",
@@ -33,11 +34,14 @@
     "gulp-sass": "~2.0.4",
     "gulp-sourcemaps": "~1.6.0",
     "gulp-uglify": "~1.4.1",
+    "gulp-util": "~3.0.6",
     "hintify": "~0.1.0",
+    "lodash.assign": "~3.2.0",
     "node-sass": "~3.3.3",
     "tsify": "~0.12.2",
     "vinyl-buffer": "~1.0.0",
-    "vinyl-source-stream": "~1.1.0"
+    "vinyl-source-stream": "~1.1.0",
+    "watchify": "~3.4.0"
   },
   "license": "MIT"
 }

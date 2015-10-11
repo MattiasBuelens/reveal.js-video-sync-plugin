@@ -1,7 +1,9 @@
 var gulp = require('gulp');
 var path = require('path');
+var assign = require('lodash.assign');
 
 var browserify = require('browserify');
+var watchify = require('watchify');
 var tsify = require('tsify');
 var hintify = require('hintify');
 var uglify = require('gulp-uglify');
@@ -12,9 +14,12 @@ var postcss = require('gulp-postcss');
 var autoprefixer = require('autoprefixer');
 var csswring = require('csswring');
 
+var browserSync = require('browser-sync').create();
+
 var del = require('del');
 var header = require('gulp-header');
 var rename = require('gulp-rename');
+var gutil = require('gulp-util');
 var buffer = require('vinyl-buffer');
 var source = require('vinyl-source-stream');
 
@@ -27,6 +32,7 @@ var paths = {
     css: ['./dist/**.css', '!./dist/**.min.css']
 };
 
+// Banner
 var pkg = require('./package.json');
 var banner = (
     '/*!\n' +
@@ -40,72 +46,125 @@ var banner = (
     ' */\n\n'
 );
 
+// Main entry point
 var entry = 'video-sync',
     tsEntry = paths.src + entry + '.ts',
     jsEntry = entry + '.js';
 
-gulp.task('clean', function () {
-    return del([
-        paths.dist,
-        paths.src + '**.js',
-        paths.src + '**.js.map',
-        paths.src + '**.d.ts'
-    ]);
+// Browserify
+var bOptions = assign({}, watchify.args, {
+    entries: [tsEntry],
+    standalone: 'RevealVideoSync',
+    debug: true
 });
+var b = browserify(bOptions);
+b.plugin(tsify, {
+    target: 'es5',
+    sourceMap: true
+});
+b.transform(hintify);
+b.on('log', gutil.log);
 
-gulp.task('js', function () {
-    var bundler = browserify(tsEntry, {
-        standalone: 'RevealVideoSync',
-        debug: true
-    }).plugin(tsify, {
-        target: 'es5',
-        sourceMap: true
-    }).transform(hintify);
+function relativePath(from, to) {
+    return path.relative(from, to).split(path.sep).join('/');
+}
 
-    return bundler
-        .bundle(function (err) {
-            if (err) {
-                console.error(err.toString());
-            }
-        })
+function js() {
+    return b
+        .bundle()
+        .on('error', gutil.log.bind(gutil, 'Browserify error'))
         .pipe(source(jsEntry, paths.src))
         .pipe(buffer())
         .pipe(sourcemaps.init({loadMaps: true}))
-        .pipe(header(banner, {pkg: pkg}))
-        .pipe(sourcemaps.write('.', {includeContent: false, sourceRoot: path.relative(paths.dist, '.')}))
-        .pipe(gulp.dest(paths.dist));
+        .pipe(header(banner, {pkg: pkg}));
+}
+
+gulp.task('js:dev', function () {
+    var bundle = function () {
+        return js()
+            .pipe(sourcemaps.write({
+                sourceRoot: relativePath(paths.dist, '.')
+            }))
+            .pipe(gulp.dest(paths.dist))
+            .pipe(browserSync.stream({match: ['**/*.js']}));
+    };
+    b.on('update', bundle);
+    bundle();
 });
 
-gulp.task('js-min', ['js'], function () {
-    return gulp.src(paths.js)
-        .pipe(sourcemaps.init({loadMaps: true}))
-        .pipe(rename({suffix: '.min'}))
-        .pipe(uglify())
-        .pipe(sourcemaps.write('.', {includeContent: false, sourceRoot: '.'}))
-        .pipe(gulp.dest(paths.dist));
+gulp.task('js:prod', function () {
+    var bundle = function () {
+        return js()
+            .pipe(uglify())
+            .pipe(rename({suffix: '.min'}))
+            .pipe(sourcemaps.write('.', {
+                sourceRoot: relativePath(paths.dist, '.')
+            }))
+            .pipe(gulp.dest(paths.dist))
+            .pipe(browserSync.stream({match: ['**/*.js']}));
+    };
+    b.on('update', bundle);
+    bundle();
 });
 
-gulp.task('css', function () {
+function css() {
     return gulp.src(paths.scss)
         .pipe(sourcemaps.init())
         .pipe(sass())
         .pipe(postcss([
             autoprefixer
         ]))
-        .pipe(header(banner, {pkg: pkg}))
-        .pipe(sourcemaps.write('.', {includeContent: false, sourceRoot: path.relative(paths.dist, paths.src)}))
-        .pipe(gulp.dest(paths.dist));
+        .pipe(header(banner, {pkg: pkg}));
+}
+
+gulp.task('css:dev', function () {
+    return css()
+        .pipe(sourcemaps.write({
+            sourceRoot: relativePath(paths.dist, paths.src)
+        }))
+        .pipe(gulp.dest(paths.dist))
+        .pipe(browserSync.stream({match: ['**/*.css']}));
 });
 
-gulp.task('css-min', ['css'], function () {
-    return gulp.src(paths.css)
-        .pipe(sourcemaps.init({loadMaps: true}))
-        .pipe(rename({suffix: '.min'}))
+gulp.task('css:prod', function () {
+    return css()
         .pipe(postcss([
             csswring
         ]))
-        .pipe(sourcemaps.write('.', {includeContent: false, sourceRoot: '.'}))
-        .pipe(gulp.dest(paths.dist));
+        .pipe(rename({suffix: '.min'}))
+        .pipe(sourcemaps.write('.', {
+            sourceRoot: relativePath(paths.dist, paths.src)
+        }))
+        .pipe(gulp.dest(paths.dist))
+        .pipe(browserSync.stream({match: ['**/*.css']}));
 });
 
-gulp.task('default', ['js-min', 'css-min']);
+gulp.task('watch', function () {
+    b = watchify(b);
+    gulp.watch(paths.scss, ['css']);
+});
+
+gulp.task('browsersync', function () {
+    browserSync.init({
+        open: false,
+        server: {
+            baseDir: '.'
+        }
+    });
+    gulp.watch(['*.html'], browserSync.reload);
+});
+
+gulp.task('clean', function () {
+    return del([
+        paths.dist
+    ]);
+});
+
+gulp.task('default', ['build:prod']);
+gulp.task('serve', ['serve:dev']);
+
+gulp.task('build:dev', ['js:dev', 'css:dev']);
+gulp.task('build:prod', ['js:prod', 'css:prod']);
+
+gulp.task('serve:dev', ['watch', 'build:dev', 'browsersync']);
+gulp.task('serve:prod', ['watch', 'build:prod', 'browsersync']);
