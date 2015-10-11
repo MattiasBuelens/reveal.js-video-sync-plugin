@@ -1,13 +1,22 @@
 /* globals Reveal */
 
 /// <reference path="../typings/reveal/reveal.d.ts" />
+/// <reference path="vtt.d.ts" />
 
 import EventEmitter from './event-emitter';
+import { WebVTT } from 'vtt.js';
 
+interface Video extends EventTarget {
+    getCurrentTime() : number;
+    setCurrentTime(time:number) : void;
+}
 
     var containerClass:string = 'reveal-video-sync',
         container:HTMLElement,
         video:HTMLVideoElement;
+
+    var test = new EventEmitter();
+    var foo = new WebVTT.Parser<string>(window, new WebVTT.StringDecoder());
 
     function initialize() {
         // Video container
@@ -21,7 +30,7 @@ import EventEmitter from './event-emitter';
         }
         // Video element
         if (!video) {
-            video = <HTMLVideoElement> container.querySelector('video');
+            video = container.getElementsByTagName('video')[0];
             if (!video) {
                 video = document.createElement('video');
                 video.controls = true;
