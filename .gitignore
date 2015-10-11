@@ -16,14 +16,5 @@ node_modules
 *.iml
 .idea/
 
-### TypeScript ###
-src/*.js
-src/*.js.map
-src/*.d.ts
-
 ### TSD ###
 typings/
-
-### Sass ###
-src/*.css
-src/*.css.map
