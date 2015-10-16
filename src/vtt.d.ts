@@ -2,42 +2,63 @@ interface TextDecodeOptions {
     stream?: boolean;
 }
 
-interface TextDecoder<T> {
-    decode(buffer?:T, options?:TextDecodeOptions):string;
+interface TextDecoderOf<T> {
+    decode(input?:T, options?:TextDecodeOptions): string;
 }
 
-type DirectionSetting = "" | "rl" | "lr";
-type LineAlignSetting = "start" | "middle" | "end";
-type PositionAlignSetting = "start" | "middle" | "end" | "auto";
-type AlignSetting = "start" | "middle" | "end" | "left" | "right";
-
-declare class VTTCue extends TextTrackCue {
-    constructor(startTime:number, endTime:number, text:string);
-
-    region:VTTRegion;
-    vertical:DirectionSetting;
-    snapToLines:boolean;
-    line:number | 'auto';
-    lineAlign:LineAlignSetting;
-    position:number | 'auto';
-    positionAlign:PositionAlignSetting;
-    size:number;
-    align:AlignSetting;
-    text:string;
-
-    getCueAsHTML():DocumentFragment;
+interface TextDecoder extends TextDecoderOf<ArrayBufferView> {
+    decode(input?:ArrayBufferView, options?:TextDecodeOptions): string;
 }
 
 declare module 'vtt.js' {
 
-    module WebVTT {
+    export class VTTCue {
+        constructor(startTime:number, endTime:number, text:string);
+
+        region:VTTRegion;
+        vertical:string;
+        snapToLines:boolean;
+        line:number|string;
+        lineAlign:string;
+        position:number|string;
+        positionAlign:string;
+        size:number;
+        align:string;
+        text:string;
+
+        getCueAsHTML():DocumentFragment;
+
+        toJSON():{[key:string]:any};
+
+        static create(options:{[key:string]:any}):VTTCue;
+
+        static fromJSON(json:string):VTTCue;
+    }
+
+    export class VTTRegion {
+        constructor();
+
+        width:number;
+        lines:number;
+        regionAnchorX:number;
+        regionAnchorY:number;
+        viewportAnchorX:number;
+        viewportAnchorY:number;
+        scroll:string;
+
+        static create(options:{[key:string]:any}):VTTCue;
+
+        static fromJSON(json:string):VTTCue;
+    }
+
+    export module WebVTT {
 
         function convertCueToDOMTree(window:Window, cuetext:string):HTMLElement;
 
         function processCues(window:Window, cues:VTTCue[], overlay:HTMLElement):void;
 
         class Parser<T> {
-            constructor(window:Window, decoder:TextDecoder<T>);
+            constructor(window:Window, decoder:TextDecoderOf<T>);
 
             onregion:(VTTRegion) => void;
             oncue:(VTTCue) => void;
@@ -48,18 +69,21 @@ declare module 'vtt.js' {
             flush():Parser<T>;
         }
 
-        interface ParsingError extends Error {
-            code: number;
+        const enum ParsingErrorCode {
+            BadSignature = 0,
+            BadTimeStamp = 1
         }
 
-        class StringDecoder implements TextDecoder<string> {
+        interface ParsingError extends Error {
+            code: ParsingErrorCode;
+        }
+
+        class StringDecoder implements TextDecoderOf<string> {
             constructor();
 
-            decode(buffer?:string):string;
+            decode(input?:string, options?:TextDecodeOptions):string;
         }
 
     }
-
-    declare var VTTCue = VTTCue;
 
 }
