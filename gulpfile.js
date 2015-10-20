@@ -58,10 +58,7 @@ var bOptions = assign({}, watchify.args, {
     debug: true
 });
 var b = browserify(bOptions);
-b.plugin(tsify, {
-    target: 'es5',
-    sourceMap: true
-});
+b.plugin(tsify, require('./tsconfig.json'));
 b.transform(hintify);
 b.on('log', gutil.log);
 
@@ -160,7 +157,8 @@ gulp.task('clean', function () {
     ]);
 });
 
-gulp.task('default', ['build:prod']);
+gulp.task('default', ['build']);
+gulp.task('build', ['build:prod']);
 gulp.task('serve', ['serve:dev']);
 
 gulp.task('build:dev', ['js:dev', 'css:dev']);
