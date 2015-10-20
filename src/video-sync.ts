@@ -1,137 +1,11 @@
 /* globals Reveal */
 
 /// <reference path="../typings/reveal/reveal.d.ts" />
-/// <reference path="./promise.d.ts" />
+/// <reference path="../typings/bluebird/bluebird.d.ts" />
 
 declare var require;
 
-import Promise = require('promise');
-
-class CancellationError implements Error {
-    name = "cancel";
-    message = "cancelled";
-
-    constructor() {
-        Error.call(this);
-    }
-}
-
-class CancellablePromise<R> extends Promise<R> {
-    private _parent:CancellablePromise<R>;
-
-    private _cancelPromise:Promise<any>;
-    private _cancelFunction:() => void;
-
-    private _isDone:boolean;
-    private _isCancelled:boolean;
-
-    constructor(original, parent?:CancellablePromise<any>) {
-        this._parent = parent;
-        var originalPromise = new Promise(original);
-        var cancelPromise = new Promise((resolve, reject) => {
-            if (!this._isDone) {
-                this._cancelFunction = reject.bind(new Error("cancelled"));
-                if (this._isCancelled) {
-                    this._cancelFunction();
-                }
-            }
-        });
-        // Cancel self when parent is cancelled
-        if (this._parent) {
-            cancelPromise = Promise.race([
-                cancelPromise,
-                this._parent._cancelPromise
-            ]);
-        }
-        this._cancelPromise = cancelPromise;
-        // Clean up on success
-        var onSuccess = () => {
-            this._isDone = true;
-            this._cancelFunction = null;
-        };
-        originalPromise.then(onSuccess, onSuccess);
-        // Clean up on cancel
-        var onCancel = () => {
-            this._isCancelled = true;
-            this._cancelFunction = null;
-        };
-        this._cancelPromise.catch(onCancel);
-        // Race between success and cancel
-        super((resolve, reject) => {
-            originalPromise.then(resolve, reject);
-            cancelPromise.then(null, reject);
-        });
-    }
-
-    isCancelled() {
-        return !this._isDone && (this._isCancelled || (this._parent && this._parent.isCancelled()));
-    }
-
-    private doCancel() {
-        if (this._isDone) {
-            return false;
-        }
-        if (this._parent && this._parent.doCancel()) {
-            // Cancelled parent
-            return true;
-        } else if (this._cancelFunction) {
-            // Cancelled self
-            this._cancelFunction();
-        } else {
-            // Will cancel self
-            this._isCancelled = true;
-        }
-        return true;
-    }
-
-    cancel() {
-        this.doCancel();
-        return this;
-    }
-
-    then<U>(onFulfilled, onRejected?):CancellablePromise<U> {
-        return this.toCancellable(super.then((value) => {
-            return this.toCancellable(Promise.resolve(value).then(onFulfilled));
-        }, (reason) => {
-            return this.toCancellable(Promise.reject(reason).then(null, onRejected));
-        }));
-    }
-
-    done(onFulfilled, onRejected?):CancellablePromise<R> {
-        return <CancellablePromise<R>> super.done(onFulfilled, onRejected);
-    }
-
-    catch(onRejected?):CancellablePromise<R> {
-        return <CancellablePromise<R>> super.catch(onRejected);
-    }
-
-    finally(handler):CancellablePromise<R> {
-        return <CancellablePromise<R>> super.finally(handler);
-    }
-
-    nodeify(func):CancellablePromise<R> {
-        return <CancellablePromise<R>> super.nodeify(func);
-    }
-
-    static resolve<R>(value:R|Promise<R>):CancellablePromise<R> {
-        return CancellablePromise.toCancellable(Promise.resolve(value));
-    }
-
-    static reject<R>(reason:any):CancellablePromise<R> {
-        return CancellablePromise.toCancellable(Promise.reject(reason));
-    }
-
-    private toCancellable<U>(promise:Promise<U>):CancellablePromise<U> {
-        return CancellablePromise.toCancellable(promise, this);
-    }
-
-    private static toCancellable<U>(promise:Promise<U>, parent?:CancellablePromise<any>):CancellablePromise<U> {
-        return new CancellablePromise<U>((resolve, reject) => {
-            promise.then(resolve, reject);
-        }, parent);
-    }
-
-}
+import Promise = require('bluebird');
 
 function waitForEvent(target:EventTarget, type:string):CancellablePromise<Event> {
     var listener;
@@ -139,6 +13,7 @@ function waitForEvent(target:EventTarget, type:string):CancellablePromise<Event>
         listener = (event) => resolve(event);
         target.addEventListener(type, listener);
     })
+        .cancellable()
         .finally(() => {
             target.removeEventListener(type, listener);
         });
@@ -157,7 +32,7 @@ interface Video {
 class HTML5Video implements Video {
     private video:HTMLVideoElement;
 
-    private slidesTrackPromise:CancellablePromise<HTMLTrackElement>;
+    private slidesTrackPromise:Promise<HTMLTrackElement>;
 
     constructor(video) {
         this.video = video;
@@ -200,17 +75,17 @@ class HTML5Video implements Video {
     }
 
 
-    private waitForMetadata():CancellablePromise<any> {
+    private waitForMetadata():Promise<Event> {
         if (this.video.readyState > 0) {
-            return CancellablePromise.resolve(null);
+            return Promise.resolve<Event>(null);
         } else {
             return waitForEvent(this.video, 'loadedmetadata');
         }
     }
 
-    private createSlidesTrack(slidesUrl:string):CancellablePromise<HTMLTrackElement> {
+    private createSlidesTrack(slidesUrl:string):Promise<HTMLTrackElement> {
         if (!slidesUrl) {
-            return CancellablePromise.resolve<HTMLTrackElement>(null);
+            return Promise.resolve<HTMLTrackElement>(null);
         }
 
         this.slidesTrackPromise = this.waitForMetadata()

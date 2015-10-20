@@ -4,7 +4,10 @@
   "description": "Synchronize video playback with reveal.js slide changes",
   "main": "video-sync.js",
   "scripts": {
-    "start": "grunt serve"
+    "start": "gulp serve",
+    "postinstall": "npm run bluebird-install",
+    "bluebird-install": "cd ./vendor/bluebird && npm install",
+    "bluebird-build": "cd ./vendor/bluebird && node tools/build --no-debug --browser --main --features='core cancel'"
   },
   "homepage": "https://github.com/MattiasBuelens/reveal.js-video-sync-plugin",
   "author": {
@@ -18,14 +21,17 @@
   "engines": {
     "node": "~4.1.1"
   },
+  "browser": {
+    "bluebird": "./vendor/bluebird/js/main/bluebird.js"
+  },
   "dependencies": {
     "express": "~4.13.3",
-    "promise": "~7.0.4",
     "vtt.js": "^0.12.1"
   },
   "devDependencies": {
     "autoprefixer": "~6.0.3",
     "browser-sync": "~2.9.11",
+    "browserify": "~11.2.0",
     "csswring": "~4.0.0",
     "del": "~2.0.2",
     "gulp": "~3.9.0",
