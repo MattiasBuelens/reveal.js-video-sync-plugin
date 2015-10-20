@@ -3,13 +3,13 @@
 /// <reference path="../typings/reveal/reveal.d.ts" />
 /// <reference path="../typings/bluebird/bluebird.d.ts" />
 
-declare var require;
+declare var require: (name:string) => any;
 
 import Promise = require('bluebird');
 
-function waitForEvent(target:EventTarget, type:string):CancellablePromise<Event> {
-    var listener;
-    return new CancellablePromise<Event>((resolve, reject) => {
+function waitForEvent(target:EventTarget, type:string):Promise<Event> {
+    var listener:EventListener;
+    return new Promise<Event>((resolve, reject) => {
         listener = (event) => resolve(event);
         target.addEventListener(type, listener);
     })
@@ -34,7 +34,7 @@ class HTML5Video implements Video {
 
     private slidesTrackPromise:Promise<HTMLTrackElement>;
 
-    constructor(video) {
+    constructor(video:HTMLVideoElement) {
         this.video = video;
     }
 
@@ -42,15 +42,15 @@ class HTML5Video implements Video {
         return this.video.currentTime;
     }
 
-    setCurrentTime(time) {
+    setCurrentTime(time:number) {
         this.video.currentTime = time;
     }
 
-    addEventListener(type, handler) {
+    addEventListener(type:string, handler:() => void) {
         this.video.addEventListener(type, handler, false);
     }
 
-    removeEventListener(type, handler) {
+    removeEventListener(type:string, handler:() => void) {
         this.video.removeEventListener(type, handler, false);
     }
 
@@ -103,7 +103,7 @@ class HTML5Video implements Video {
 
     private removeSlidesTrack() {
         if (this.slidesTrackPromise) {
-            this.slidesTrackPromise.cancel().then((trackElement) => {
+            this.slidesTrackPromise.cancel().then((trackElement:HTMLTrackElement) => {
                 this.video.removeChild(trackElement);
             });
         }
@@ -136,11 +136,11 @@ module RevealUtils {
     export function parseSlide(hash:string):RevealIndices {
         // Attempt to parse the hash as either an index or name
         var bits = hash.split('/'),
-            h, v, f;
+            h:number, v:number, f:number;
         if (isNaN(parseInt(bits[0], 10))) {
             // Named slide
             var name = bits[0],
-                element;
+                element:HTMLElement;
             // Ensure the named link is a valid HTML ID attribute
             if (/^[a-zA-Z][\w:.-]*$/.test(name)) {
                 // Find the slide with the specified ID
@@ -172,6 +172,8 @@ module RevealUtils {
 
 }
 
+type SlideMap = { [h: number] : { [v: number] : { [f: number] : TextTrackCue[] } } };
+
 class Synchronizer {
 
     private video:Video;
@@ -180,7 +182,7 @@ class Synchronizer {
     private activeCue:TextTrackCue;
     private activeSlide:RevealIndices;
 
-    private slideMap:{ [h: number] : { [v: number] : { [f: number] : TextTrackCue[] } } };
+    private slideMap:SlideMap;
 
     private cueChangeListener = () => {
         this.onCueChange();
@@ -262,7 +264,7 @@ class Synchronizer {
     }
 
     private loadSlideMap() {
-        var slideMap = this.slideMap = {};
+        var slideMap:SlideMap = this.slideMap = {};
         for (var i = 0; i < this.track.cues.length; i++) {
             var cue = this.track.cues[i],
                 slide = Synchronizer.getCueSlide(cue);
@@ -276,7 +278,7 @@ class Synchronizer {
     }
 
     private findClosestSlideCue(slide:RevealIndices, time:number):TextTrackCue {
-        var slideMap = this.slideMap;
+        var slideMap:SlideMap = this.slideMap;
         if (!slideMap) {
             // Not loaded
             return null;
@@ -288,7 +290,7 @@ class Synchronizer {
             // Not found
             return null;
         }
-        var closestCue,
+        var closestCue:TextTrackCue,
             closestDistance = Infinity;
         for (var i = 0; i < f.length; i++) {
             var cue = f[i],
@@ -317,7 +319,7 @@ module RevealVideoSync {
         videoElement:HTMLVideoElement,
         video:Video;
 
-    function loadVideo(videoUrl) {
+    function loadVideo(videoUrl:string) {
         // Video container
         if (!container) {
             container = <HTMLElement> document.getElementsByClassName(containerClass)[0];
