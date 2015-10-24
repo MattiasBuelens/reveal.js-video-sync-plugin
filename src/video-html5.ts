@@ -19,6 +19,14 @@ export class HTML5Video implements Video {
         this.video.currentTime = time;
     }
 
+    getSource() {
+        return this.video.src;
+    }
+
+    setSource(source:string) {
+        this.video.src = source;
+    }
+
     addEventListener(type:string, handler:() => void) {
         this.video.addEventListener(type, handler, false);
     }

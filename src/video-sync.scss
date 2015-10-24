@@ -5,7 +5,7 @@ $slide-height: 100% - $video-height;
   height: $slide-height !important;
 }
 
-.reveal .reveal-video-sync {
+.reveal-video-sync {
   position: fixed;
   left: 0;
   bottom: 0;
@@ -13,11 +13,11 @@ $slide-height: 100% - $video-height;
   box-sizing: border-box;
   padding: 10px;
   height: $video-height;
+}
 
-  video {
-    max-width: 100%;
-    max-height: 100%;
-  }
+.reveal-video-sync-player {
+  max-width: 100%;
+  max-height: 100%;
 }
 
 .reveal.reveal-video-sync-right {

@@ -30,6 +30,7 @@
 		</script>
 
 		<link rel="stylesheet" href="dist/video-sync.css">
+		<link rel="stylesheet" href="https://vjs.zencdn.net/5.0.0/video-js.css" type="text/css">
 
 		<!--[if lt IE 9]>
 		<script src="https://cdn.jsdelivr.net/reveal.js/3.0.0/lib/js/html5shiv.js"></script>
@@ -383,6 +384,7 @@ Reveal.addEventListener( 'customevent', function() {
 
 		<script src="https://cdn.jsdelivr.net/reveal.js/3.0.0/lib/js/head.min.js"></script>
 		<script src="https://cdn.jsdelivr.net/reveal.js/3.0.0/js/reveal.js"></script>
+		<script src="http://vjs.zencdn.net/5.0.0/video.js"></script>
 
 		<script>
 
@@ -406,7 +408,7 @@ Reveal.addEventListener( 'customevent', function() {
 					{ src: 'https://cdn.jsdelivr.net/reveal.js/3.0.0/plugin/notes/notes.js', async: true },
 					{ src: 'dist/video-sync.js', async: true,
 						callback: function() {
-							RevealVideoSync.load('http://www.webestools.com/page/media/videoTag/BigBuckBunny.webm', './slides.vtt');
+							RevealVideoSync.loadVideoJS('./slides.vtt', 'http://www.webestools.com/page/media/videoTag/BigBuckBunny.webm');
 						}
 					}
 				]
