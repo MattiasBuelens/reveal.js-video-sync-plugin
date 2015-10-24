@@ -1,13 +1,11 @@
-interface Video extends EventTarget {
-    currentTime : number;
-    addEventListener(type:'timeupdate', listener:EventListener, useCapture?:boolean):void;
-    removeEventListener(type:'timeupdate', listener:EventListener, useCapture?:boolean):void;
-}
+import { Disposable } from './common';
 
-interface Track {
+export interface Video extends Disposable {
+    getCurrentTime() : number;
+    setCurrentTime(time:number) : void;
 
-}
+    addEventListener(type:string, handler:() => void) : void;
+    removeEventListener(type:string, handler:() => void) : void;
 
-interface TrackVideo {
-
+    loadSlides(slidesVttUrl:string, callback:(error:Error, track?:TextTrack) => void) : void;
 }
