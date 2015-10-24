@@ -2,7 +2,7 @@ import { Disposable } from './common';
 import { Video } from './video';
 import * as RevealUtils from './reveal-utils';
 
-type RevealIndices = RevealUtils.RevealIndices;
+type RevealIndices = RevealUtils.Indices;
 type SlideMap = { [h: number] : { [v: number] : { [f: number] : TextTrackCue[] } } };
 
 export class Synchronizer implements Disposable {

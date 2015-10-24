@@ -2,29 +2,27 @@
 
 /// <reference path="../typings/reveal/reveal.d.ts" />
 
-import { HTML5Video } from './video-html5';
-
-export interface RevealIndices {
+export interface Indices {
     h: number,
     v: number,
     f?: number
 }
 
-export function normalizeSlide(indices:RevealIndices):RevealIndices {
+export function normalizeSlide(indices:Indices):Indices {
     indices.h = indices.h || 0;
     indices.v = indices.v || 0;
     indices.f = (typeof indices.f === 'number' && !isNaN(indices.f)) ? indices.f : -1;
     return indices;
 }
 
-export function slidesEqual(left:RevealIndices, right:RevealIndices):boolean {
+export function slidesEqual(left:Indices, right:Indices):boolean {
     if (!left || !right) {
         return !left && !right;
     }
     return left.h === right.h && left.v === right.v && left.f === right.f;
 }
 
-export function parseSlide(hash:string):RevealIndices {
+export function parseSlide(hash:string):Indices {
     // Attempt to parse the hash as either an index or name
     var bits = hash.split('/'),
         h:number, v:number, f:number;
@@ -57,6 +55,6 @@ export function parseSlide(hash:string):RevealIndices {
     return normalizeSlide({h: h, v: v, f: f});
 }
 
-export function jumpToSlide(slide:RevealIndices) {
+export function jumpToSlide(slide:Indices) {
     Reveal.slide(slide.h, slide.v, slide.f);
 }
