@@ -1,38 +1,29 @@
 /* globals Reveal */
 
 /// <reference path="../typings/reveal/reveal.d.ts" />
-/// <reference path="../typings/bluebird/bluebird.d.ts" />
 
-declare var require: (name:string) => any;
+declare var require:(name:string) => any;
 
-import Promise = require('bluebird');
-
-function waitForEvent(target:EventTarget, type:string):Promise<Event> {
-    var listener:EventListener;
-    return new Promise<Event>((resolve, reject) => {
-        listener = (event) => resolve(event);
-        target.addEventListener(type, listener);
-    })
-        .cancellable()
-        .finally(() => {
-            target.removeEventListener(type, listener);
-        });
+interface Disposable {
+    dispose() : void;
 }
 
-interface Video {
+interface Video extends Disposable {
     getCurrentTime() : number;
     setCurrentTime(time:number) : void;
 
     addEventListener(type:string, handler:() => void) : void;
     removeEventListener(type:string, handler:() => void) : void;
 
-    loadSlides(slidesVttUrl:string) : Promise<TextTrack>;
+    loadSlides(slidesVttUrl:string, callback:(error:Error, track?:TextTrack) => void) : void;
 }
 
 class HTML5Video implements Video {
     private video:HTMLVideoElement;
 
-    private slidesTrackPromise:Promise<HTMLTrackElement>;
+    private videoMetadataListener:EventListener;
+    private trackLoadListener:EventListener;
+    private trackElement:HTMLTrackElement;
 
     constructor(video:HTMLVideoElement) {
         this.video = video;
@@ -54,59 +45,100 @@ class HTML5Video implements Video {
         this.video.removeEventListener(type, handler, false);
     }
 
-    loadSlides(slidesUrl:string):Promise<TextTrack> {
-        this.removeSlidesTrack();
+    loadSlides(slidesUrl:string, callback:(error:Error, track?:TextTrack) => void) {
+        this.unloadSlides();
 
         if (!slidesUrl) {
-            return Promise.resolve<TextTrack>(null);
+            callback(new Error('missing slides URL'));
+            return;
         }
 
-        return this.createSlidesTrack(slidesUrl)
-            .then((trackElement) => {
-                // Wait for load
-                return waitForEvent(trackElement, 'load')
-                    .then(() => trackElement);
-            })
-            .then((trackElement) => {
+        this.createSlidesTrack(slidesUrl, (error, trackElement) => {
+            if (error) {
+                callback(error);
+                return;
+            }
+            this.waitForTrackLoad((error) => {
+                if (error) {
+                    callback(error);
+                    return;
+                }
                 var track = trackElement.track;
                 track.mode = 'hidden';
-                return track;
+                callback(null, track);
             });
+        });
     }
 
+    dispose() {
+        this.unloadSlides();
+        this.video = null;
+    }
 
-    private waitForMetadata():Promise<Event> {
-        if (this.video.readyState > 0) {
-            return Promise.resolve<Event>(null);
+    private waitForMetadata(callback:(error:Error) => void) {
+        if (this.video.readyState >= HTMLMediaElement.HAVE_METADATA) {
+            return callback(null);
         } else {
-            return waitForEvent(this.video, 'loadedmetadata');
+            var listener = () => {
+                this.video.removeEventListener('loadedmetadata', listener);
+                if (this.videoMetadataListener === listener) {
+                    this.videoMetadataListener = null;
+                    callback(null);
+                }
+            };
+            this.video.addEventListener('loadedmetadata', listener);
+            this.videoMetadataListener = listener;
         }
     }
 
-    private createSlidesTrack(slidesUrl:string):Promise<HTMLTrackElement> {
-        if (!slidesUrl) {
-            return Promise.resolve<HTMLTrackElement>(null);
+    private waitForTrackLoad(callback:(error:Error) => void) {
+        if (!this.trackElement) {
+            return callback(new Error('missing track element'));
         }
-
-        this.slidesTrackPromise = this.waitForMetadata()
-            .then(() => {
-                var trackElement = document.createElement('track');
-                trackElement.kind = 'metadata';
-                trackElement.src = slidesUrl;
-                trackElement['default'] = true;
-                this.video.appendChild(trackElement);
-                return trackElement;
-            });
-
-        return this.slidesTrackPromise;
+        if (this.trackElement.readyState === HTMLTrackElement.LOADED) {
+            return callback(null);
+        } else {
+            var listener = () => {
+                this.trackElement.removeEventListener('load', listener);
+                if (this.trackLoadListener === listener) {
+                    this.trackLoadListener = null;
+                    callback(null);
+                }
+            };
+            this.trackElement.addEventListener('load', listener);
+            this.trackLoadListener = listener;
+        }
     }
 
-    private removeSlidesTrack() {
-        if (this.slidesTrackPromise) {
-            this.slidesTrackPromise.cancel().then((trackElement:HTMLTrackElement) => {
-                this.video.removeChild(trackElement);
-            });
+    private createSlidesTrack(slidesUrl:string, callback:(error:Error, trackElement?:HTMLTrackElement) => void) {
+        this.waitForMetadata((error) => {
+            if (error) {
+                callback(error);
+                return;
+            }
+            var trackElement = document.createElement('track');
+            trackElement.kind = 'metadata';
+            trackElement.src = slidesUrl;
+            trackElement['default'] = true;
+            this.video.appendChild(trackElement);
+            this.trackElement = trackElement;
+            callback(null, trackElement);
+        });
+    }
+
+    private unloadSlides() {
+        if (this.videoMetadataListener) {
+            this.video.removeEventListener('loadedmetadata', this.videoMetadataListener);
         }
+        if (this.trackElement) {
+            if (this.trackLoadListener) {
+                this.trackElement.removeEventListener('load', this.trackLoadListener);
+            }
+            this.video.removeChild(this.trackElement);
+        }
+        this.videoMetadataListener = null;
+        this.trackLoadListener = null;
+        this.trackElement = null;
     }
 
 }
@@ -174,7 +206,7 @@ module RevealUtils {
 
 type SlideMap = { [h: number] : { [v: number] : { [f: number] : TextTrackCue[] } } };
 
-class Synchronizer {
+class Synchronizer implements Disposable {
 
     private video:Video;
     private track:TextTrack;
@@ -229,6 +261,9 @@ class Synchronizer {
         Reveal.removeEventListener('slidechanged', this.slideChangeListener);
         Reveal.removeEventListener('fragmentshown', this.slideChangeListener);
         Reveal.removeEventListener('fragmenthidden', this.slideChangeListener);
+
+        this.video.dispose();
+        this.video = null;
     }
 
     private onCueChange() {
@@ -346,12 +381,16 @@ module RevealVideoSync {
         return video;
     }
 
-    export function load(videoUrl:string, slidesVttUrl:string):Promise<Synchronizer> {
+    export function load(videoUrl:string, slidesVttUrl:string, callback?:(error:Error, synchronizer?:Synchronizer) => void):void {
         var video = loadVideo(videoUrl);
-        return video.loadSlides(slidesVttUrl)
-            .then((track) => {
-                return new Synchronizer(video, track);
-            });
+        return video.loadSlides(slidesVttUrl, (error, track) => {
+            if (error) {
+                if (callback) callback(error);
+                return;
+            }
+            var synchronizer = new Synchronizer(video, track);
+            if (callback) callback(null, synchronizer);
+        });
     }
 
 }

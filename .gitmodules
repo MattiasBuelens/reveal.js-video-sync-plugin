@@ -1,3 +1,0 @@
-[submodule "vendor/bluebird"]
-	path = vendor/bluebird
-	url = https://github.com/petkaantonov/bluebird
