@@ -12,6 +12,10 @@ pids
 .grunt
 node_modules
 
+### TypeScript ###
+src/*.js
+src/*.js.map
+
 ### Intellij ###
 *.iml
 .idea/
