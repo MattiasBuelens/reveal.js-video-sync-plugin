@@ -138,7 +138,14 @@ gulp.task('css:prod', function () {
 
 gulp.task('watch', function () {
     b = watchify(b);
-    gulp.watch(paths.scss, ['css']);
+});
+
+gulp.task('watch:dev', ['watch'], function () {
+    gulp.watch(paths.scss, ['css:dev']);
+});
+
+gulp.task('watch:prod', ['watch'], function () {
+    gulp.watch(paths.scss, ['css:prod']);
 });
 
 gulp.task('browsersync', function () {
@@ -164,5 +171,5 @@ gulp.task('serve', ['serve:dev']);
 gulp.task('build:dev', ['js:dev', 'css:dev']);
 gulp.task('build:prod', ['js:prod', 'css:prod']);
 
-gulp.task('serve:dev', ['watch', 'build:dev', 'browsersync']);
-gulp.task('serve:prod', ['watch', 'build:prod', 'browsersync']);
+gulp.task('serve:dev', ['watch:dev', 'build:dev', 'browsersync']);
+gulp.task('serve:prod', ['watch:prod', 'build:prod', 'browsersync']);
