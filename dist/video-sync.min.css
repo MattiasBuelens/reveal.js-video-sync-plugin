@@ -1,10 +1,10 @@
 /*!
- * reveal.js video sync 0.0.1
+ * reveal.js video sync 0.0.2
  *
  * Synchronize video playback with reveal.js slide changes
  * https://github.com/MattiasBuelens/reveal.js-video-sync-plugin
  * License: MIT
  *
  * Copyright (C) Mattias Buelens (http://github.com/MattiasBuelens)
- */.reveal{height:70vh!important}.reveal-video-sync{position:relative;font-size:12px;height:30vh}.reveal-video-sync video{max-width:100%;max-height:100%}.reveal-video-sync .reveal-video-sync-player{position:absolute;left:0;right:auto;bottom:0;width:46.22222vh;height:26vh;margin:2vh}.reveal.reveal-video-sync-right .controls{left:10px;right:auto}.reveal.reveal-video-sync-right~.reveal-video-sync .reveal-video-sync-player{left:auto;right:0}
+ */.reveal{height:70vh!important}.reveal-video-sync{position:relative;font-size:12px;height:30vh;z-index:100}.reveal-video-sync video{max-width:100%;max-height:100%}.reveal-video-sync .reveal-video-sync-player{position:absolute;left:0;right:auto;bottom:0;width:46.22222vh;height:26vh;margin:2vh}.reveal.reveal-video-sync-right .controls{left:10px;right:auto}.reveal.reveal-video-sync-right~.reveal-video-sync .reveal-video-sync-player{left:auto;right:0}
 /*# sourceMappingURL=video-sync.min.css.map */

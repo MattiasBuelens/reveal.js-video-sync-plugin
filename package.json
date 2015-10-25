@@ -1,6 +1,6 @@
 {
   "name": "reveal.js-video-sync",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Synchronize video playback with reveal.js slide changes",
   "main": "dist/video-sync.js",
   "scripts": {

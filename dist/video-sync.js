@@ -1,5 +1,5 @@
 /*!
- * reveal.js video sync 0.0.1
+ * reveal.js video sync 0.0.2
  *
  * Synchronize video playback with reveal.js slide changes
  * https://github.com/MattiasBuelens/reveal.js-video-sync-plugin
