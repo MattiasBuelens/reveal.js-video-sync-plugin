@@ -13,6 +13,7 @@ $slide-height: 100vh - $video-height;
   position: relative;
   font-size: 12px;
   height: $video-height;
+  z-index: 100; // above presentation
 
   video {
     max-width: 100%;
