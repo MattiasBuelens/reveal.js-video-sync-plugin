@@ -1,0 +1,38 @@
+/*!
+ * reveal.js video sync 0.0.1
+ *
+ * Synchronize video playback with reveal.js slide changes
+ * https://github.com/MattiasBuelens/reveal.js-video-sync-plugin
+ * License: MIT
+ *
+ * Copyright (C) Mattias Buelens (http://github.com/MattiasBuelens)
+ */
+
+.reveal {
+  height: 70vh !important; }
+
+.reveal-video-sync {
+  position: relative;
+  font-size: 12px;
+  height: 30vh; }
+  .reveal-video-sync video {
+    max-width: 100%;
+    max-height: 100%; }
+  .reveal-video-sync .reveal-video-sync-player {
+    position: absolute;
+    left: 0;
+    right: auto;
+    bottom: 0;
+    width: 46.22222vh;
+    height: 26vh;
+    margin: 2vh; }
+
+.reveal.reveal-video-sync-right .controls {
+  left: 10px;
+  right: auto; }
+
+.reveal.reveal-video-sync-right ~ .reveal-video-sync .reveal-video-sync-player {
+  left: auto;
+  right: 0; }
+
+/*# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbInZpZGVvLXN5bmMuY3NzIiwidmlkZW8tc3luYy5zY3NzIl0sIm5hbWVzIjpbXSwibWFwcGluZ3MiOiJBQUFBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0EsQUNIQTtFQUNFLHdCQUFnQyxFQUR6Qjs7QUFJVDtFQUNFLG1CQUFtQjtFQUNuQixnQkFBZ0I7RUFDaEIsYUFiaUIsRUFVQztFQUtsQjtJQUNFLGdCQUFnQjtJQUNoQixpQkFBaUIsRUFGWjtFQUtQO0lBQ0UsbUJBQW1CO0lBQ25CLFFBQVE7SUFDUixZQUFZO0lBQ1osVUFBVTtJQUNWLGtCQXRCeUI7SUF1QnpCLGFBeEJ5QjtJQXlCekIsWUExQmUsRUFtQlU7O0FBWTNCO0VBQ0UsV0FBVztFQUNYLFlBQVksRUFGSDs7QUFNVDtFQUNFLFdBQVc7RUFDWCxTQUFTLEVBRmdCIiwiZmlsZSI6InZpZGVvLXN5bmMuY3NzIiwic291cmNlc0NvbnRlbnQiOltudWxsLCIkYXNwZWN0LXJhdGlvOiAxNiAvIDk7XHJcbiR2aWRlby1oZWlnaHQ6IDMwdmg7XHJcbiRwbGF5ZXItbWFyZ2luOiAydmg7XHJcbiRwbGF5ZXItaGVpZ2h0OiAkdmlkZW8taGVpZ2h0IC0gMiAqICRwbGF5ZXItbWFyZ2luO1xyXG4kcGxheWVyLXdpZHRoOiAkcGxheWVyLWhlaWdodCAqICRhc3BlY3QtcmF0aW87XHJcbiRzbGlkZS1oZWlnaHQ6IDEwMHZoIC0gJHZpZGVvLWhlaWdodDtcclxuXHJcbi5yZXZlYWwge1xyXG4gIGhlaWdodDogJHNsaWRlLWhlaWdodCAhaW1wb3J0YW50O1xyXG59XHJcblxyXG4ucmV2ZWFsLXZpZGVvLXN5bmMge1xyXG4gIHBvc2l0aW9uOiByZWxhdGl2ZTtcclxuICBmb250LXNpemU6IDEycHg7XHJcbiAgaGVpZ2h0OiAkdmlkZW8taGVpZ2h0O1xyXG5cclxuICB2aWRlbyB7XHJcbiAgICBtYXgtd2lkdGg6IDEwMCU7XHJcbiAgICBtYXgtaGVpZ2h0OiAxMDAlO1xyXG4gIH1cclxuXHJcbiAgLnJldmVhbC12aWRlby1zeW5jLXBsYXllciB7XHJcbiAgICBwb3NpdGlvbjogYWJzb2x1dGU7XHJcbiAgICBsZWZ0OiAwO1xyXG4gICAgcmlnaHQ6IGF1dG87XHJcbiAgICBib3R0b206IDA7XHJcbiAgICB3aWR0aDogJHBsYXllci13aWR0aDtcclxuICAgIGhlaWdodDogJHBsYXllci1oZWlnaHQ7XHJcbiAgICBtYXJnaW46ICRwbGF5ZXItbWFyZ2luO1xyXG4gIH1cclxufVxyXG5cclxuLnJldmVhbC5yZXZlYWwtdmlkZW8tc3luYy1yaWdodCB7XHJcbiAgLmNvbnRyb2xzIHtcclxuICAgIGxlZnQ6IDEwcHg7XHJcbiAgICByaWdodDogYXV0bztcclxuICB9XHJcblxyXG4gICYgfiAucmV2ZWFsLXZpZGVvLXN5bmMge1xyXG4gICAgLnJldmVhbC12aWRlby1zeW5jLXBsYXllciB7XHJcbiAgICAgIGxlZnQ6IGF1dG87XHJcbiAgICAgIHJpZ2h0OiAwO1xyXG4gICAgfVxyXG4gIH1cclxufVxyXG4iXSwic291cmNlUm9vdCI6Ii4uL3NyYyJ9 */

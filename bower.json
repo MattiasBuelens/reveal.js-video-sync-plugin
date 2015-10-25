@@ -1,7 +1,7 @@
 {
   "name": "reveal.js-video-sync",
   "description": "Synchronize video playback with reveal.js slide changes",
-  "main": "video-sync.js",
+  "main": "dist/video-sync.js",
   "authors": [
     "Mattias Buelens"
   ],

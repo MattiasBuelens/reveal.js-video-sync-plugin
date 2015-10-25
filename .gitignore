@@ -1,5 +1,5 @@
 ### grunt ###
-dist/
+#dist/
 .tmp/
 
 ### Node ###
