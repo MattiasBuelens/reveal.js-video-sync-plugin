@@ -1,23 +1,33 @@
-$video-height: 30%;
-$slide-height: 100% - $video-height;
+$aspect-ratio: 16 / 9;
+$video-height: 30vh;
+$player-margin: 2vh;
+$player-height: $video-height - 2 * $player-margin;
+$player-width: $player-height * $aspect-ratio;
+$slide-height: 100vh - $video-height;
 
 .reveal {
   height: $slide-height !important;
 }
 
 .reveal-video-sync {
-  position: fixed;
-  left: 0;
-  bottom: 0;
-  z-index: 20;
-  box-sizing: border-box;
-  padding: 10px;
+  position: relative;
+  font-size: 12px;
   height: $video-height;
-}
 
-.reveal-video-sync-player {
-  max-width: 100%;
-  max-height: 100%;
+  video {
+    max-width: 100%;
+    max-height: 100%;
+  }
+
+  .reveal-video-sync-player {
+    position: absolute;
+    left: 0;
+    right: auto;
+    bottom: 0;
+    width: $player-width;
+    height: $player-height;
+    margin: $player-margin;
+  }
 }
 
 .reveal.reveal-video-sync-right {
@@ -25,9 +35,11 @@ $slide-height: 100% - $video-height;
     left: 10px;
     right: auto;
   }
-  .reveal-video-sync {
-    left: auto;
-    right: 0;
-    text-align: right;
+
+  & ~ .reveal-video-sync {
+    .reveal-video-sync-player {
+      left: auto;
+      right: 0;
+    }
   }
 }

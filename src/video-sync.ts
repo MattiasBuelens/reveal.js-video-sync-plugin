@@ -10,12 +10,18 @@ var containerClass:string = 'reveal-video-sync',
     videoClass:string = 'reveal-video-sync-player';
 
 function createContainer() {
+    var reveal:Node;
     if (!container) {
         container = <HTMLElement> document.getElementsByClassName(containerClass)[0];
         if (!container) {
             container = document.createElement('aside');
             container.className = containerClass;
-            document.querySelector('.reveal').appendChild(container);
+            reveal = document.querySelector('.reveal');
+            if (reveal.nextSibling) {
+                reveal.parentNode.insertBefore(container, reveal.nextSibling)
+            } else {
+                reveal.parentNode.appendChild(container);
+            }
         }
     }
     return container;
