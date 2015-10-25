@@ -408,7 +408,26 @@ Reveal.addEventListener( 'customevent', function() {
 					{ src: 'https://cdn.jsdelivr.net/reveal.js/3.0.0/plugin/notes/notes.js', async: true },
 					{ src: 'dist/video-sync.js', async: true,
 						callback: function() {
-							RevealVideoSync.loadVideoJS('./slides.vtt', 'http://www.webestools.com/page/media/videoTag/BigBuckBunny.webm');
+							var videoURL = 'http://distribution.bbb3d.renderfarming.net/video/mp4/bbb_sunflower_1080p_30fps_normal.mp4';
+							var slidesURL = './slides.vtt';
+							var callback = function (err, synchronizer) {
+								if (err) {
+									console.error(err);
+									return;
+								}
+								console.log('created synchronizer');
+							};
+							var useVideoJS = false; // toggle me!
+							var video = RevealVideoSync.element();
+							video.src = videoURL;
+							if (useVideoJS) {
+								var player = videojs(video);
+								player.addClass('video-js');
+								player.addClass('vjs-big-play-centered');
+								RevealVideoSync.videojs(player, slidesURL, callback);
+							} else {
+								RevealVideoSync.html5(video, slidesURL, callback);
+							}
 						}
 					}
 				]

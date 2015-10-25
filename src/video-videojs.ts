@@ -7,6 +7,10 @@ import { Video } from './video';
 export class VideoJSVideo implements Video {
     private player:VideoJSPlayer;
 
+    private slidesTrack:TextTrack;
+    private cueLoadTimer:number;
+    private static cueLoadTimeout = 100;
+
     constructor(player:VideoJSPlayer) {
         this.player = player;
     }
@@ -35,6 +39,28 @@ export class VideoJSVideo implements Video {
         this.player.off(type, handler);
     }
 
+    onReady(handler:() => void) {
+        this.player.ready(handler);
+    }
+
+    waitForTrackLoad(callback:() => void) {
+        // VideoJS does not provide a 'load' event for text tracks
+        // so just poll the cues list until it has a stable number of cues
+        var self = this,
+            lastCueLength = 0,
+            checkCueLoad = () => {
+                clearTimeout(self.cueLoadTimer);
+                var newCueLength = self.slidesTrack.cues && self.slidesTrack.cues.length;
+                if (newCueLength > 0 && lastCueLength === newCueLength) {
+                    callback();
+                } else {
+                    lastCueLength = newCueLength;
+                    this.cueLoadTimer = setTimeout(checkCueLoad, VideoJSVideo.cueLoadTimeout);
+                }
+            };
+        checkCueLoad();
+    }
+
     loadSlides(slidesUrl:string, callback:(error:Error, track?:TextTrack) => void) {
         this.unloadSlides();
 
@@ -42,6 +68,17 @@ export class VideoJSVideo implements Video {
             callback(new Error('missing slides URL'));
             return;
         }
+
+        this.slidesTrack = this.player.addRemoteTextTrack({
+            kind: 'metadata',
+            mode: 'showing',
+            'default': true,
+            src: slidesUrl
+        }).track;
+
+        this.waitForTrackLoad(() => {
+            callback(null, this.slidesTrack);
+        });
     }
 
     dispose() {
@@ -50,7 +87,11 @@ export class VideoJSVideo implements Video {
     }
 
     private unloadSlides() {
-
+        clearTimeout(this.cueLoadTimer);
+        if (this.slidesTrack) {
+            this.player.removeRemoteTextTrack(this.slidesTrack);
+            this.slidesTrack = null;
+        }
     }
 
 }

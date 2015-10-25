@@ -2,11 +2,12 @@ import { Video } from './video';
 import { HTML5Video } from './video-html5';
 import { VideoJSVideo } from './video-videojs';
 import { Synchronizer } from './synchronizer';
+import * as DOMUtils from './dom-utils';
 
 var containerClass:string = 'reveal-video-sync',
     container:HTMLElement,
     videoElement:HTMLVideoElement,
-    video:Video;
+    videoClass:string = 'reveal-video-sync-player';
 
 function createContainer() {
     if (!container) {
@@ -33,13 +34,6 @@ function createVideoElement() {
     return videoElement;
 }
 
-function isAttached(node:Node) {
-    while (node && node !== document) {
-        node = node.parentNode;
-    }
-    return (node === document);
-}
-
 type Callback = (error:Error, synchronizer?:Synchronizer) => void;
 
 function loadSlides(video:Video, slidesVttUrl:string, callback?:Callback) {
@@ -53,45 +47,33 @@ function loadSlides(video:Video, slidesVttUrl:string, callback?:Callback) {
     });
 }
 
-export function loadHTML5(slidesVttUrl:string, source?:string, videoElement?:HTMLVideoElement, callback?:Callback):void {
-    var container = createContainer(),
-        video:Video;
-    if (!videoElement) {
-        videoElement = createVideoElement();
-    }
-    if (!isAttached(videoElement)) {
-        container.appendChild(videoElement);
-    }
-    videoElement.className += " reveal-video-sync-player";
-    video = new HTML5Video(videoElement);
-    if (source) {
-        video.setSource(source);
-    }
-    loadSlides(video, slidesVttUrl, callback);
+export function element():HTMLVideoElement {
+    return createVideoElement();
 }
 
-export function loadVideoJS(slidesVttUrl:string, source?:string, player?:VideoJSPlayer, callback?:Callback):void {
+export function html5(videoElement:HTMLVideoElement, slidesVttUrl:string, callback?:Callback):void {
     var container = createContainer(),
         video:Video;
+    if (!DOMUtils.isAttached(videoElement)) {
+        container.appendChild(videoElement);
+    }
+    DOMUtils.addClass(videoElement, videoClass);
+    video = new HTML5Video(videoElement);
+    video.onReady(() => {
+        loadSlides(video, slidesVttUrl, callback);
+    });
+}
+
+export function videojs(player:VideoJSPlayer, slidesVttUrl:string, callback?:Callback):void {
+    var video:Video;
     if (!videojs) {
         if (callback) callback(new Error('video.js not loaded'));
         return;
     }
-    if (!player) {
-        var videoElement = createVideoElement();
-        videoElement.className += " video-js reveal-video-sync-player";
-        player = videojs(videoElement);
-    }
-    if (!isAttached(player.el())) {
-        container.appendChild(player.el());
-    }
-    player.ready(() => {
-        player.controls(true);
-
-        var video:Video = new VideoJSVideo(player);
-        if (source) {
-            video.setSource(source);
-        }
+    player.addClass(videoClass);
+    player.addClass('video-js');
+    video = new VideoJSVideo(player);
+    video.onReady(() => {
         loadSlides(video, slidesVttUrl, callback);
-    })
+    });
 }
