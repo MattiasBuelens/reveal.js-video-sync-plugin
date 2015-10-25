@@ -22,3 +22,6 @@ src/*.js.map
 
 ### TSD ###
 typings/
+
+### Bower ###
+bower_components/

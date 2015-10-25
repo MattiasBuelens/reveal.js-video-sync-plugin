@@ -1,0 +1,27 @@
+{
+  "name": "reveal.js-video-sync",
+  "description": "Synchronize video playback with reveal.js slide changes",
+  "main": "video-sync.js",
+  "authors": [
+    "Mattias Buelens"
+  ],
+  "license": "MIT",
+  "keywords": [
+    "reveal.js"
+  ],
+  "homepage": "https://github.com/MattiasBuelens/reveal.js-video-sync-plugin",
+  "moduleType": [
+    "amd",
+    "es6",
+    "globals"
+  ],
+  "private": true,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components"
+  ],
+  "dependencies": {
+    "video.js": "videojs#~5.0.2"
+  }
+}
