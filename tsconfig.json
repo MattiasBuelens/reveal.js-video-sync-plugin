@@ -6,7 +6,6 @@
         "sourceMap": true
     },
     "files": [
-    	"./src/**/*.ts",
-    	"./typings/**/*.ts"
+    	"src/video-sync.ts"
     ]
 }
