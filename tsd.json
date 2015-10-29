@@ -10,9 +10,6 @@
     },
     "videojs/videojs.d.ts": {
       "commit": "af5b8275d1f2b92738b93fddabc461fc20c553a1"
-    },
-    "bluebird/bluebird.d.ts": {
-      "commit": "af5b8275d1f2b92738b93fddabc461fc20c553a1"
     }
   }
 }
