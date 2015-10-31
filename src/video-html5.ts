@@ -1,37 +1,44 @@
+'use strict';
+
 import { Video } from './video';
 
 export class HTML5Video implements Video {
-    private video:HTMLVideoElement;
+    private video: HTMLVideoElement;
 
-    private videoMetadataListener:EventListener;
-    private trackLoadListener:EventListener;
-    private trackElement:HTMLTrackElement;
+    private videoMetadataListener: EventListener;
+    private trackLoadListener: EventListener;
+    private trackElement: HTMLTrackElement;
 
-    constructor(video:HTMLVideoElement) {
+    constructor(video: HTMLVideoElement) {
         this.video = video;
     }
 
-    getCurrentTime() {
+    public getCurrentTime(): number {
         return this.video.currentTime;
     }
 
-    setCurrentTime(time:number) {
+    public setCurrentTime(time: number): void {
         this.video.currentTime = time;
     }
 
-    addEventListener(type:string, handler:() => void) {
+    public addEventListener(type: string, handler: () => void): void {
         this.video.addEventListener(type, handler, false);
     }
 
-    removeEventListener(type:string, handler:() => void) {
+    public removeEventListener(type: string, handler: () => void): void {
         this.video.removeEventListener(type, handler, false);
     }
 
-    onReady(handler:() => void) {
+    public onReady(handler: () => void): void {
         setTimeout(handler, 0);
     }
 
-    loadSlides(slidesUrl:string, callback:(error:Error, track?:TextTrack) => void) {
+    public dispose(): void {
+        this.unloadSlides();
+        this.video = null;
+    }
+
+    public loadSlides(slidesUrl: string, callback: (error: Error, track?: TextTrack) => void): void {
         this.unloadSlides();
 
         if (!slidesUrl) {
@@ -39,33 +46,28 @@ export class HTML5Video implements Video {
             return;
         }
 
-        this.createSlidesTrack(slidesUrl, (error, trackElement) => {
-            if (error) {
-                callback(error);
+        this.createSlidesTrack(slidesUrl, (error1: Error, trackElement?: HTMLTrackElement) => {
+            if (error1) {
+                callback(error1);
                 return;
             }
-            this.waitForTrackLoad((error) => {
-                if (error) {
-                    callback(error);
+            this.waitForTrackLoad((error2: Error) => {
+                if (error2) {
+                    callback(error2);
                     return;
                 }
-                var track = trackElement.track;
+                let track = trackElement.track;
                 track.mode = 'hidden';
                 callback(null, track);
             });
         });
     }
 
-    dispose() {
-        this.unloadSlides();
-        this.video = null;
-    }
-
-    private waitForMetadata(callback:(error:Error) => void) {
+    private waitForMetadata(callback: (error: Error) => void): void {
         if (this.video.readyState >= HTMLMediaElement.HAVE_METADATA) {
             return callback(null);
         } else {
-            var listener = () => {
+            let listener = () => {
                 this.video.removeEventListener('loadedmetadata', listener);
                 if (this.videoMetadataListener === listener) {
                     this.videoMetadataListener = null;
@@ -77,14 +79,14 @@ export class HTML5Video implements Video {
         }
     }
 
-    private waitForTrackLoad(callback:(error:Error) => void) {
+    private waitForTrackLoad(callback: (error: Error) => void): void {
         if (!this.trackElement) {
             return callback(new Error('missing track element'));
         }
         if (this.trackElement.readyState === HTMLTrackElement.LOADED) {
             return callback(null);
         } else {
-            var listener = () => {
+            let listener = () => {
                 this.trackElement.removeEventListener('load', listener);
                 if (this.trackLoadListener === listener) {
                     this.trackLoadListener = null;
@@ -96,13 +98,13 @@ export class HTML5Video implements Video {
         }
     }
 
-    private createSlidesTrack(slidesUrl:string, callback:(error:Error, trackElement?:HTMLTrackElement) => void) {
-        this.waitForMetadata((error) => {
+    private createSlidesTrack(slidesUrl: string, callback: (error: Error, trackElement?: HTMLTrackElement) => void): void {
+        this.waitForMetadata((error: Error) => {
             if (error) {
                 callback(error);
                 return;
             }
-            var trackElement = document.createElement('track');
+            let trackElement = document.createElement('track');
             trackElement.kind = 'metadata';
             trackElement.src = slidesUrl;
             trackElement['default'] = true;
@@ -112,7 +114,7 @@ export class HTML5Video implements Video {
         });
     }
 
-    private unloadSlides() {
+    private unloadSlides(): void {
         if (this.videoMetadataListener) {
             this.video.removeEventListener('loadedmetadata', this.videoMetadataListener);
         }

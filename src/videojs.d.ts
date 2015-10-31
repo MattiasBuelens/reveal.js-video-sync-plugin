@@ -2,7 +2,7 @@
 
 interface VideoJSComponent {
     el(): HTMLElement;
-    addClass(classToAdd:string): void;
+    addClass(classToAdd: string): void;
 }
 
 interface VideoJSTextTrackOptions {
@@ -16,14 +16,14 @@ interface VideoJSTextTrackOptions {
 }
 
 interface VideoJSRemoteTextTrack {
-    track: TextTrack
+    track: TextTrack;
 }
 
 interface VideoJSPlayer extends VideoJSComponent {
     currentSrc(): string;
 
     remoteTextTracks(): TextTrackList;
-    addTextTrack(kind:string, label?:string, language?:string): TextTrack;
-    addRemoteTextTrack(options:VideoJSTextTrackOptions): VideoJSRemoteTextTrack;
-    removeRemoteTextTrack(track:TextTrack): void;
+    addTextTrack(kind: string, label?: string, language?: string): TextTrack;
+    addRemoteTextTrack(options: VideoJSTextTrackOptions): VideoJSRemoteTextTrack;
+    removeRemoteTextTrack(track: TextTrack): void;
 }

@@ -2,66 +2,48 @@
 
 /// <reference path="./videojs.d.ts" />
 
+'use strict';
+
 import { Video } from './video';
 
 export class VideoJSVideo implements Video {
-    private player:VideoJSPlayer;
+    private static cueLoadTimeout: number = 100;
 
-    private slidesTrack:TextTrack;
-    private cueLoadTimer:number;
-    private static cueLoadTimeout = 100;
+    private player: VideoJSPlayer;
 
-    constructor(player:VideoJSPlayer) {
+    private slidesTrack: TextTrack;
+    private cueLoadTimer: number;
+
+    constructor(player: VideoJSPlayer) {
         this.player = player;
     }
 
-    getCurrentTime() {
+    public getCurrentTime(): number {
         return this.player.currentTime();
     }
 
-    setCurrentTime(time:number) {
+    public setCurrentTime(time: number): void {
         this.player.currentTime(time);
     }
 
-    getSource() {
-        return this.player.currentSrc();
-    }
-
-    setSource(source:string) {
-        this.player.src(source);
-    }
-
-    addEventListener(type:string, handler:() => void) {
+    public addEventListener(type: string, handler: () => void): void {
         this.player.on(type, handler);
     }
 
-    removeEventListener(type:string, handler:() => void) {
+    public removeEventListener(type: string, handler: () => void): void {
         this.player.off(type, handler);
     }
 
-    onReady(handler:() => void) {
+    public onReady(handler: () => void): void {
         this.player.ready(handler);
     }
 
-    waitForTrackLoad(callback:() => void) {
-        // VideoJS does not provide a 'load' event for text tracks
-        // so just poll the cues list until it has a stable number of cues
-        var self = this,
-            lastCueLength = 0,
-            checkCueLoad = () => {
-                clearTimeout(self.cueLoadTimer);
-                var newCueLength = self.slidesTrack.cues && self.slidesTrack.cues.length;
-                if (newCueLength > 0 && lastCueLength === newCueLength) {
-                    callback();
-                } else {
-                    lastCueLength = newCueLength;
-                    this.cueLoadTimer = setTimeout(checkCueLoad, VideoJSVideo.cueLoadTimeout);
-                }
-            };
-        checkCueLoad();
+    public dispose(): void {
+        this.unloadSlides();
+        this.player = null;
     }
 
-    loadSlides(slidesUrl:string, callback:(error:Error, track?:TextTrack) => void) {
+    public loadSlides(slidesUrl: string, callback: (error: Error, track?: TextTrack) => void): void {
         this.unloadSlides();
 
         if (!slidesUrl) {
@@ -81,12 +63,25 @@ export class VideoJSVideo implements Video {
         });
     }
 
-    dispose() {
-        this.unloadSlides();
-        this.player = null;
+    private waitForTrackLoad(callback: () => void): void {
+        // VideoJS does not provide a 'load' event for text tracks
+        // so just poll the cues list until it has a stable number of cues
+        let self = this,
+            lastCueLength = 0,
+            checkCueLoad = () => {
+                clearTimeout(self.cueLoadTimer);
+                let newCueLength = self.slidesTrack.cues && self.slidesTrack.cues.length;
+                if (newCueLength > 0 && lastCueLength === newCueLength) {
+                    callback();
+                } else {
+                    lastCueLength = newCueLength;
+                    this.cueLoadTimer = setTimeout(checkCueLoad, VideoJSVideo.cueLoadTimeout);
+                }
+            };
+        checkCueLoad();
     }
 
-    private unloadSlides() {
+    private unloadSlides(): void {
         clearTimeout(this.cueLoadTimer);
         if (this.slidesTrack) {
             this.player.removeRemoteTextTrack(this.slidesTrack);
