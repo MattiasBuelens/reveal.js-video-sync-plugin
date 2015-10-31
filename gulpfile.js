@@ -103,7 +103,7 @@ gulp.task('js:prod', ['tslint:prod'], function () {
 });
 
 function lint(files) {
-    return gulp.src(files || [tsEntry])
+    return gulp.src(files || paths.ts)
         .pipe(tslint({
             configuration: require('./tslint.json')
         }));
