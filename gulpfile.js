@@ -112,7 +112,7 @@ function lint(files) {
 gulp.task('tslint:dev', function () {
     var doLint = function (files) {
         return lint(files)
-            .pipe(tslint.report('prose', { emitError: false }));
+            .pipe(tslint.report('verbose', { emitError: false }));
     };
     b.on('update', doLint);
     return doLint();
