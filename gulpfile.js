@@ -75,7 +75,7 @@ function js() {
         .pipe(header(banner, {pkg: pkg}));
 }
 
-gulp.task('js:dev', ['tslint'], function () {
+gulp.task('js:dev', ['tslint:dev'], function () {
     var bundle = function () {
         return js()
             .pipe(sourcemaps.write({
@@ -88,7 +88,7 @@ gulp.task('js:dev', ['tslint'], function () {
     return bundle();
 });
 
-gulp.task('js:prod', ['tslint'], function () {
+gulp.task('js:prod', ['tslint:prod'], function () {
     var bundle = function () {
         return js()
             .pipe(uglify())
@@ -106,13 +106,25 @@ function lint(files) {
     return gulp.src(files || [tsEntry])
         .pipe(tslint({
             configuration: require('./tslint.json')
-        }))
-        .pipe(tslint.report(null, { emitError: true }));
+        }));
 }
 
-gulp.task('tslint', function () {
-    b.on('update', lint);
-    return lint();
+gulp.task('tslint:dev', function () {
+    var doLint = function (files) {
+        return lint(files)
+            .pipe(tslint.report('prose', { emitError: false }));
+    };
+    b.on('update', doLint);
+    return doLint();
+});
+
+gulp.task('tslint:prod', function () {
+    var doLint = function (files) {
+        return lint(files)
+            .pipe(tslint.report(null, { emitError: true }));
+    };
+    b.on('update', doLint);
+    return doLint();
 });
 
 function css() {
