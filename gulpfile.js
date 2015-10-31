@@ -5,7 +5,7 @@ var assign = require('lodash.assign');
 var browserify = require('browserify');
 var watchify = require('watchify');
 var tsify = require('tsify');
-var hintify = require('hintify');
+var tslint = require('gulp-tslint');
 var uglify = require('gulp-uglify');
 var sourcemaps = require('gulp-sourcemaps');
 
@@ -59,7 +59,6 @@ var bOptions = assign({}, watchify.args, {
 });
 var b = browserify(bOptions);
 b.plugin(tsify, require('./tsconfig.json'));
-b.transform(hintify);
 b.on('log', gutil.log);
 
 function relativePath(from, to) {
@@ -76,7 +75,7 @@ function js() {
         .pipe(header(banner, {pkg: pkg}));
 }
 
-gulp.task('js:dev', function () {
+gulp.task('js:dev', ['tslint'], function () {
     var bundle = function () {
         return js()
             .pipe(sourcemaps.write({
@@ -89,7 +88,7 @@ gulp.task('js:dev', function () {
     return bundle();
 });
 
-gulp.task('js:prod', function () {
+gulp.task('js:prod', ['tslint'], function () {
     var bundle = function () {
         return js()
             .pipe(uglify())
@@ -97,11 +96,23 @@ gulp.task('js:prod', function () {
             .pipe(sourcemaps.write('.', {
                 sourceRoot: relativePath(paths.dist, '.')
             }))
-            .pipe(gulp.dest(paths.dist))
-            .pipe(browserSync.stream({match: ['**/*.js']}));
+            .pipe(gulp.dest(paths.dist));
     };
     b.on('update', bundle);
     return bundle();
+});
+
+function lint(files) {
+    return gulp.src(files || [tsEntry])
+        .pipe(tslint({
+            configuration: require('./tslint.json')
+        }))
+        .pipe(tslint.report(null, { emitError: true }));
+}
+
+gulp.task('tslint', function () {
+    b.on('update', lint);
+    return lint();
 });
 
 function css() {
