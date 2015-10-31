@@ -86,7 +86,7 @@ gulp.task('js:dev', function () {
             .pipe(browserSync.stream({match: ['**/*.js']}));
     };
     b.on('update', bundle);
-    bundle();
+    return bundle();
 });
 
 gulp.task('js:prod', function () {
@@ -101,7 +101,7 @@ gulp.task('js:prod', function () {
             .pipe(browserSync.stream({match: ['**/*.js']}));
     };
     b.on('update', bundle);
-    bundle();
+    return bundle();
 });
 
 function css() {
