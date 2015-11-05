@@ -5,6 +5,24 @@ $player-height: $video-height - 2 * $player-margin;
 $player-width: $player-height * $aspect-ratio;
 $slide-height: 100vh - $video-height;
 
+@mixin fullscreen() {
+  &:-webkit-full-screen {
+    @content;
+  }
+
+  &:-moz-full-screen {
+    @content;
+  }
+
+  &:-ms-fullscreen {
+    @content;
+  }
+
+  &:fullscreen {
+    @content;
+  }
+}
+
 .reveal {
   height: $slide-height !important;
 }
@@ -42,5 +60,11 @@ $slide-height: 100vh - $video-height;
       left: auto;
       right: 0;
     }
+  }
+}
+
+.reveal-video-sync-player {
+  @include fullscreen {
+    margin: 0;
   }
 }
