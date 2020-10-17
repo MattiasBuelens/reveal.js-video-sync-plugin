@@ -75,7 +75,7 @@ function js() {
         .pipe(header(banner, {pkg: pkg}));
 }
 
-gulp.task('js:dev', ['tslint:dev'], function () {
+const jsDev = gulp.series([tslintDev, function jsDev() {
     var bundle = function () {
         return js()
             .pipe(sourcemaps.write({
@@ -86,9 +86,9 @@ gulp.task('js:dev', ['tslint:dev'], function () {
     };
     b.on('update', bundle);
     return bundle();
-});
+}]);
 
-gulp.task('js:prod', ['tslint:prod'], function () {
+const jsProd = gulp.series([tslintProd, function jsProd() {
     var bundle = function () {
         return js()
             .pipe(uglify())
@@ -100,32 +100,33 @@ gulp.task('js:prod', ['tslint:prod'], function () {
     };
     b.on('update', bundle);
     return bundle();
-});
+}]);
 
-function lint(files) {
+function lint(files, formatter) {
     return gulp.src(files || paths.ts)
         .pipe(tslint({
-            configuration: require('./tslint.json')
+            configuration: './tslint.json',
+            formatter
         }));
 }
 
-gulp.task('tslint:dev', function () {
+function tslintDev() {
     var doLint = function (files) {
-        return lint(files)
-            .pipe(tslint.report('verbose', { emitError: false }));
+        return lint(files, 'verbose')
+            .pipe(tslint.report({emitError: false}));
     };
     b.on('update', doLint);
     return doLint();
-});
+}
 
-gulp.task('tslint:prod', function () {
+function tslintProd() {
     var doLint = function (files) {
-        return lint(files)
-            .pipe(tslint.report(null, { emitError: true }));
+        return lint(files, undefined)
+            .pipe(tslint.report({emitError: true}));
     };
     b.on('update', doLint);
     return doLint();
-});
+}
 
 function css() {
     return gulp.src(paths.scss)
@@ -137,16 +138,16 @@ function css() {
         .pipe(header(banner, {pkg: pkg}));
 }
 
-gulp.task('css:dev', function () {
+function cssDev() {
     return css()
         .pipe(sourcemaps.write({
             sourceRoot: relativePath(paths.dist, paths.src)
         }))
         .pipe(gulp.dest(paths.dist))
         .pipe(browserSync.stream({match: ['**/*.css']}));
-});
+}
 
-gulp.task('css:prod', function () {
+function cssProd() {
     return css()
         .pipe(postcss([
             csswring
@@ -157,21 +158,21 @@ gulp.task('css:prod', function () {
         }))
         .pipe(gulp.dest(paths.dist))
         .pipe(browserSync.stream({match: ['**/*.css']}));
-});
+}
 
-gulp.task('watch', function () {
+function watch() {
     b = watchify(b);
-});
+}
 
-gulp.task('watch:dev', ['watch'], function () {
-    gulp.watch(paths.scss, ['css:dev']);
-});
+const watchDev = gulp.series([watch, function watchDev() {
+    gulp.watch(paths.scss, cssDev);
+}]);
 
-gulp.task('watch:prod', ['watch'], function () {
-    gulp.watch(paths.scss, ['css:prod']);
-});
+const watchProd = gulp.series([watch, function watchProd() {
+    gulp.watch(paths.scss, cssProd);
+}]);
 
-gulp.task('browsersync', function () {
+function browsersync() {
     browserSync.init({
         open: false,
         server: {
@@ -179,20 +180,31 @@ gulp.task('browsersync', function () {
         }
     });
     gulp.watch(['*.html'], browserSync.reload);
-});
+}
 
-gulp.task('clean', function () {
+function clean() {
     return del([
         paths.dist
     ]);
-});
+}
 
-gulp.task('default', ['build']);
-gulp.task('build', ['build:prod']);
-gulp.task('serve', ['serve:dev']);
+const buildDev = gulp.parallel([jsDev, cssDev]);
+const buildProd = gulp.parallel([jsProd, cssProd]);
+const build = gulp.series([buildProd]);
 
-gulp.task('build:dev', ['js:dev', 'css:dev']);
-gulp.task('build:prod', ['js:prod', 'css:prod']);
+const serveDev = gulp.parallel([watchDev, buildDev, browsersync]);
+const serveProd = gulp.parallel([watchProd, buildProd, browsersync]);
+const serve = gulp.series([serveDev]);
 
-gulp.task('serve:dev', ['watch:dev', 'build:dev', 'browsersync']);
-gulp.task('serve:prod', ['watch:prod', 'build:prod', 'browsersync']);
+module.exports = {
+    buildDev,
+    buildProd,
+    build,
+    serveDev,
+    serveProd,
+    serve,
+    tslintDev,
+    tslintProd,
+    clean,
+    default: build
+};
